@@ -138,14 +138,14 @@ export function InspectionPage() {
         <div className="flex-1" />
         <button
           onClick={() => { pdfProxyRef.current = null; tifFramesRef.current = null; setFile(null) }}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
         >
           変更
         </button>
         <div className="h-4 w-px bg-slate-200" />
         <button
           onClick={handleSendToComparison}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-indigo-500 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+          className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-indigo-500 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
         >
           比較モードへ送る
           <ArrowRight className="h-3.5 w-3.5" />

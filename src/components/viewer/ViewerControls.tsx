@@ -48,12 +48,12 @@ export function ViewerControls({
   onPrevPage, onNextPage, onZoomIn, onZoomOut, onFitWidth, onRotate,
 }: ViewerControlsProps) {
   return (
-    <div className="flex items-center gap-0.5 rounded-2xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm">
+    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
       <CtrlBtn onClick={onPrevPage} disabled={currentPage === 0} title="前のページ">
         <ChevronLeft className="h-4 w-4" />
       </CtrlBtn>
 
-      <span className="min-w-[72px] text-center text-sm font-semibold text-slate-600">
+      <span className="min-w-[72px] px-1 text-center text-sm font-semibold text-slate-600">
         {currentPage + 1} / {totalPages}
       </span>
 
@@ -61,7 +61,7 @@ export function ViewerControls({
         <ChevronRight className="h-4 w-4" />
       </CtrlBtn>
 
-      <div className="mx-2 h-4 w-px bg-slate-200" />
+      <div className="mx-2 h-5 w-px bg-slate-200" />
 
       <CtrlBtn onClick={onZoomOut} title="縮小 (ホイールダウン)">
         <ZoomOut className="h-4 w-4" />
@@ -81,7 +81,7 @@ export function ViewerControls({
 
       {showRotation && (
         <>
-          <div className="mx-2 h-4 w-px bg-slate-200" />
+          <div className="mx-2 h-5 w-px bg-slate-200" />
           <CtrlBtn onClick={onRotate} title="右に90°回転">
             <RotateCw className="h-4 w-4" />
           </CtrlBtn>

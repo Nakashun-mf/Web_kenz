@@ -74,7 +74,7 @@ export function DocumentViewer({
   return (
     <div className="flex h-full flex-col bg-slate-200">
       {/* Controls bar */}
-      <div className="flex shrink-0 items-center justify-center border-b border-slate-200 bg-white/95 px-6 py-3 backdrop-blur-sm">
+      <div className="flex shrink-0 items-center justify-center border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur-sm">
         <ViewerControls
           currentPage={currentPage}
           totalPages={file.totalPages}

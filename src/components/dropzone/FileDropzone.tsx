@@ -47,7 +47,7 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           className={cn(
-            'flex items-center gap-2 rounded-xl border-2 border-dashed px-4 py-2.5 text-sm font-medium text-slate-500 transition-all',
+            'flex items-center gap-2.5 rounded-xl border-2 border-dashed px-5 py-3 text-sm font-medium text-slate-500 transition-all',
             'hover:border-indigo-400 hover:bg-indigo-50/50 hover:text-indigo-600',
             dragging && 'border-indigo-500 bg-indigo-50 text-indigo-600 scale-[1.02]',
           )}

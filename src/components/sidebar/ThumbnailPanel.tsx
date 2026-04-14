@@ -26,7 +26,7 @@ export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPa
       </div>
 
       {/* Thumbnail list */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {pages.map((page, index) => (
           <button
             key={index}

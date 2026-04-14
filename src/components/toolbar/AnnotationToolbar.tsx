@@ -80,10 +80,10 @@ function VerticalToolbar({
   exportLoading?: boolean
 }) {
   return (
-    <div className="relative flex h-full w-16 shrink-0 flex-col items-center border-r border-slate-800 bg-slate-900 py-5">
+    <div className="relative flex h-full w-[68px] shrink-0 flex-col items-center border-r border-slate-800 bg-slate-900 py-5">
 
       {/* Drawing tools */}
-      <div className="flex flex-col items-center gap-1">
+      <div className="flex flex-col items-center gap-1.5">
         {TOOLS.map(({ id, icon: Icon, label }) => (
           <DarkIconBtn
             key={id}
@@ -100,7 +100,7 @@ function VerticalToolbar({
       <div className="my-4 h-px w-8 shrink-0 bg-slate-700" />
 
       {/* History */}
-      <div className="flex flex-col items-center gap-1">
+      <div className="flex flex-col items-center gap-1.5">
         <DarkIconBtn onClick={undo} title="元に戻す (Ctrl+Z)">
           <Undo2 className="h-[18px] w-[18px]" />
         </DarkIconBtn>
@@ -126,7 +126,7 @@ function VerticalToolbar({
 
       {/* Export */}
       {onExport && (
-        <div className="pb-1">
+        <div className="pb-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -216,9 +216,9 @@ function HorizontalToolbar({
   exportLoading?: boolean
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-6 py-3">
+    <div className="flex items-center gap-4 border-b border-slate-200 bg-white px-6 py-3">
       {/* Drawing tools */}
-      <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
+      <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1.5">
         {TOOLS.map(({ id, icon: Icon, label }) => (
           <Tooltip key={id}>
             <TooltipTrigger asChild>
@@ -241,20 +241,20 @@ function HorizontalToolbar({
 
       {/* Text props inline */}
       {activeTool === 'text' && (
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-5 py-2">
           <span className="text-sm text-slate-400">サイズ</span>
           <input
             type="number"
             value={activeProps.fontSize}
             min={8} max={72}
             onChange={(e) => setActiveProps({ fontSize: Number(e.target.value) })}
-            className="w-14 rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-16 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <div className="h-4 w-px bg-slate-200" />
           <button
             onClick={() => setActiveProps({ showBorder: !activeProps.showBorder })}
             className={cn(
-              'rounded-lg px-3 py-1 text-sm font-semibold transition-colors',
+              'rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors',
               activeProps.showBorder ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500',
             )}
           >
@@ -280,7 +280,7 @@ function HorizontalToolbar({
       <div className="flex-1" />
 
       {/* History */}
-      <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
+      <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1.5">
         <Tooltip>
           <TooltipTrigger asChild>
             <button onClick={undo} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-white hover:text-slate-800">
