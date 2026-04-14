@@ -17,14 +17,13 @@ interface GlobalDropZoneProps {
 export function GlobalDropZone({ onFile, label = 'ファイルをドロップ', disabled = false }: GlobalDropZoneProps) {
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const enterCountRef = useRef(0)   // track nested dragenter/dragleave pairs
+  const enterCountRef = useRef(0)
 
   useEffect(() => {
     if (disabled) return
 
     const handleDragEnter = (e: DragEvent) => {
       e.preventDefault()
-      // Only react to file drags
       if (!e.dataTransfer?.types.includes('Files')) return
       enterCountRef.current++
       setDragging(true)
@@ -84,26 +83,26 @@ export function GlobalDropZone({ onFile, label = 'ファイルをドロップ', 
       <div
         className={`absolute inset-0 transition-opacity duration-150 ${
           dragging ? 'opacity-100' : 'opacity-0'
-        } bg-blue-700/10 backdrop-blur-[1px]`}
+        } bg-indigo-600/8 backdrop-blur-[2px]`}
       />
 
       {/* Drop target card */}
       {dragging && (
-        <div className="relative flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-blue-500 bg-white/90 px-16 py-12 shadow-2xl">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-            <Upload className="h-8 w-8 text-blue-600" />
+        <div className="relative flex flex-col items-center gap-5 rounded-3xl border-2 border-dashed border-indigo-400 bg-white/95 px-20 py-14 shadow-2xl">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-100">
+            <Upload className="h-10 w-10 text-indigo-600" />
           </div>
           <div className="text-center">
-            <p className="text-lg font-semibold text-blue-700">{label}</p>
-            <p className="mt-1 text-sm text-slate-500">PDF / TIF — 最大 100MB</p>
+            <p className="text-xl font-bold text-slate-800">{label}</p>
+            <p className="mt-1.5 text-sm text-slate-400">PDF / TIF — 最大 100MB</p>
           </div>
         </div>
       )}
 
       {/* Error toast */}
       {error && !dragging && (
-        <div className="relative rounded-xl border border-red-200 bg-white px-6 py-4 shadow-xl">
-          <p className="text-sm font-medium text-red-600">{error}</p>
+        <div className="relative rounded-xl border border-red-200 bg-white px-6 py-4 shadow-2xl">
+          <p className="text-sm font-semibold text-red-600">{error}</p>
         </div>
       )}
     </div>

@@ -19,6 +19,73 @@ interface AnnotationLayerProps {
   enabled: boolean
 }
 
+// ── Module-level draw helper (no React deps) ────────────────────
+function drawAnnotation(ctx: CanvasRenderingContext2D, ann: Annotation, scale: number, zoom: number) {
+  ctx.strokeStyle = STROKE_COLOR
+  ctx.fillStyle = STROKE_COLOR
+
+  switch (ann.type) {
+    case 'freehand': {
+      const a = ann as FreehandAnnotation
+      ctx.lineWidth = a.strokeWidth
+      ctx.beginPath()
+      for (let i = 0; i < a.points.length - 1; i += 2) {
+        const px = a.points[i] * scale
+        const py = a.points[i + 1] * scale
+        if (i === 0) ctx.moveTo(px, py)
+        else ctx.lineTo(px, py)
+      }
+      ctx.stroke()
+      break
+    }
+    case 'line': {
+      const a = ann as LineAnnotation
+      ctx.lineWidth = a.strokeWidth
+      ctx.beginPath()
+      ctx.moveTo(a.x * scale, a.y * scale)
+      ctx.lineTo(a.x2 * scale, a.y2 * scale)
+      ctx.stroke()
+      break
+    }
+    case 'rect': {
+      const a = ann as RectAnnotation
+      ctx.lineWidth = a.strokeWidth
+      ctx.strokeRect(a.x * scale, a.y * scale, a.width * scale, a.height * scale)
+      break
+    }
+    case 'circle': {
+      const a = ann as CircleAnnotation
+      ctx.lineWidth = a.strokeWidth
+      ctx.beginPath()
+      ctx.ellipse(a.x * scale, a.y * scale, Math.abs(a.rx) * scale, Math.abs(a.ry) * scale, 0, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+    case 'text': {
+      const a = ann as TextAnnotation
+      const fontPx = a.fontSize * scale / zoom
+      ctx.font = `${fontPx}px "Noto Sans JP", sans-serif`
+      const metrics = ctx.measureText(a.text)
+      const w = metrics.width
+      const h = fontPx * 1.4
+      const tx = a.x * scale
+      const ty = a.y * scale
+      if (a.bgColor !== 'transparent') {
+        ctx.fillStyle = a.bgColor === 'yellow' ? '#FFFF0099' : '#FFFFFF99'
+        ctx.fillRect(tx - 2, ty - h + 4, w + 4, h + 2)
+      }
+      if (a.showBorder) {
+        ctx.strokeStyle = STROKE_COLOR
+        ctx.lineWidth = 1
+        ctx.strokeRect(tx - 2, ty - h + 4, w + 4, h + 2)
+      }
+      ctx.fillStyle = STROKE_COLOR
+      ctx.fillText(a.text, tx, ty)
+      break
+    }
+  }
+}
+
 export function AnnotationLayer({
   fileId, pageIndex, canvasWidthPx, canvasHeightPx, zoom, enabled,
 }: AnnotationLayerProps) {
@@ -50,81 +117,13 @@ export function AnnotationLayer({
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     const scale = zoom * (window.devicePixelRatio || 1)
     ctx.save()
-    ctx.strokeStyle = STROKE_COLOR
-    ctx.fillStyle = STROKE_COLOR
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    for (const ann of pageAnnotations) drawAnnotation(ctx, ann, scale)
+    for (const ann of pageAnnotations) drawAnnotation(ctx, ann, scale, zoom)
     ctx.restore()
   }, [pageAnnotations, zoom])
 
   useEffect(() => { redraw() }, [redraw])
-
-  function drawAnnotation(ctx: CanvasRenderingContext2D, ann: Annotation, scale: number) {
-    ctx.strokeStyle = STROKE_COLOR
-    ctx.fillStyle = STROKE_COLOR
-
-    switch (ann.type) {
-      case 'freehand': {
-        const a = ann as FreehandAnnotation
-        ctx.lineWidth = a.strokeWidth
-        ctx.beginPath()
-        for (let i = 0; i < a.points.length - 1; i += 2) {
-          const px = a.points[i] * scale
-          const py = a.points[i + 1] * scale
-          if (i === 0) ctx.moveTo(px, py)
-          else ctx.lineTo(px, py)
-        }
-        ctx.stroke()
-        break
-      }
-      case 'line': {
-        const a = ann as LineAnnotation
-        ctx.lineWidth = a.strokeWidth
-        ctx.beginPath()
-        ctx.moveTo(a.x * scale, a.y * scale)
-        ctx.lineTo(a.x2 * scale, a.y2 * scale)
-        ctx.stroke()
-        break
-      }
-      case 'rect': {
-        const a = ann as RectAnnotation
-        ctx.lineWidth = a.strokeWidth
-        ctx.strokeRect(a.x * scale, a.y * scale, a.width * scale, a.height * scale)
-        break
-      }
-      case 'circle': {
-        const a = ann as CircleAnnotation
-        ctx.lineWidth = a.strokeWidth
-        ctx.beginPath()
-        ctx.ellipse(a.x * scale, a.y * scale, Math.abs(a.rx) * scale, Math.abs(a.ry) * scale, 0, 0, Math.PI * 2)
-        ctx.stroke()
-        break
-      }
-      case 'text': {
-        const a = ann as TextAnnotation
-        const fontPx = a.fontSize * scale / zoom
-        ctx.font = `${fontPx}px "Noto Sans JP", sans-serif`
-        const metrics = ctx.measureText(a.text)
-        const w = metrics.width
-        const h = fontPx * 1.4
-        const tx = a.x * scale
-        const ty = a.y * scale
-        if (a.bgColor !== 'transparent') {
-          ctx.fillStyle = a.bgColor === 'yellow' ? '#FFFF0099' : '#FFFFFF99'
-          ctx.fillRect(tx - 2, ty - h + 4, w + 4, h + 2)
-        }
-        if (a.showBorder) {
-          ctx.strokeStyle = STROKE_COLOR
-          ctx.lineWidth = 1
-          ctx.strokeRect(tx - 2, ty - h + 4, w + 4, h + 2)
-        }
-        ctx.fillStyle = STROKE_COLOR
-        ctx.fillText(a.text, tx, ty)
-        break
-      }
-    }
-  }
 
   function getCanvasPoint(e: React.MouseEvent): Point {
     const canvas = canvasRef.current!

@@ -32,7 +32,6 @@ export function DocumentViewer({
 
   const page = file.pages[currentPage]
 
-  // Auto-fit on file/page change
   useEffect(() => {
     if (!containerRef.current || !page) return
     const rect = containerRef.current.getBoundingClientRect()
@@ -51,7 +50,6 @@ export function DocumentViewer({
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Middle button or alt+left = pan
     if (e.button === 1 || e.altKey) {
       setIsPanning(true)
       panStartRef.current = { mouseX: e.clientX, mouseY: e.clientY, panX: panOffset.x, panY: panOffset.y }
@@ -76,7 +74,7 @@ export function DocumentViewer({
   return (
     <div className="flex h-full flex-col bg-slate-200">
       {/* Controls bar */}
-      <div className="flex shrink-0 items-center justify-center gap-2 border-b border-slate-200 bg-white/90 px-6 py-4 backdrop-blur-sm">
+      <div className="flex shrink-0 items-center justify-center border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur-sm">
         <ViewerControls
           currentPage={currentPage}
           totalPages={file.totalPages}

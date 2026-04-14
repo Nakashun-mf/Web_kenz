@@ -12,7 +12,6 @@ import { AnnotationToolbar } from '@/components/toolbar/AnnotationToolbar'
 import { FileDropzone } from '@/components/dropzone/FileDropzone'
 import { GlobalDropZone } from '@/components/dropzone/GlobalDropZone'
 import { Slider } from '@/components/ui/slider'
-import { Button } from '@/components/ui/button'
 import { Layers, Columns2 } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import type { DocumentFile } from '@/types/document'
@@ -33,7 +32,6 @@ async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy:
     const pdf = await loadPdf(buffer)
     const pages = await Promise.all(Array.from({ length: pdf.numPages }, (_, i) => getPdfPageInfo(pdf, i)))
     const doc: DocumentFile = { id: fileId, name: f.name, type: 'pdf', arrayBuffer: buffer, pages, totalPages: pdf.numPages }
-    // Generate thumbnails (fire-and-forget)
     for (let i = 0; i < pdf.numPages; i++) {
       void generatePdfThumbnail(pdf, i)
     }
@@ -46,10 +44,19 @@ async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy:
   }
 }
 
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
+      <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      読み込み中...
+    </div>
+  )
+}
+
 export function ComparisonPage() {
   const {
     oldFile, newFile, layout, overlayOpacity, activePanel,
-    oldPage, oldZoom, newZoom,
+    oldPage, newPage, oldZoom, newZoom,
     setOldFile, setNewFile, setLayout, setOverlayOpacity, setActivePanel,
     setOldPage, setOldZoom, setNewZoom,
   } = useComparisonStore()
@@ -64,42 +71,34 @@ export function ComparisonPage() {
   const [loadingNew, setLoadingNew] = useState(false)
   const [exporting, setExporting] = useState(false)
 
-  const handleOldFile = async (f: File) => {
-    setLoadingOld(true)
+  const handleFile = async (side: 'old' | 'new', f: File) => {
+    const setLoading = side === 'old' ? setLoadingOld : setLoadingNew
+    const setFile = side === 'old' ? setOldFile : setNewFile
+    const handleRef = side === 'old' ? oldHandleRef : newHandleRef
+    const otherFile = side === 'old' ? newFile : oldFile
+
+    setLoading(true)
     setError(null)
     try {
       const { doc, pdfProxy, tifFrames } = await loadDocumentFile(f)
-      oldHandleRef.current = { pdfProxy, tifFrames }
-      setOldFile(doc)
-      // Validate if new file already loaded
-      if (newFile) {
-        const result = validateComparisonFiles(doc.totalPages, newFile.totalPages, doc.pages, newFile.pages)
+      handleRef.current = { pdfProxy, tifFrames }
+      setFile(doc)
+      if (otherFile) {
+        const [aPagesCount, bPagesCount, aPages, bPages] = side === 'old'
+          ? [doc.totalPages, otherFile.totalPages, doc.pages, otherFile.pages]
+          : [otherFile.totalPages, doc.totalPages, otherFile.pages, doc.pages]
+        const result = validateComparisonFiles(aPagesCount, bPagesCount, aPages, bPages)
         if (!result.valid) setError(result.error ?? 'エラー')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラー')
     } finally {
-      setLoadingOld(false)
+      setLoading(false)
     }
   }
 
-  const handleNewFile = async (f: File) => {
-    setLoadingNew(true)
-    setError(null)
-    try {
-      const { doc, pdfProxy, tifFrames } = await loadDocumentFile(f)
-      newHandleRef.current = { pdfProxy, tifFrames }
-      setNewFile(doc)
-      if (oldFile) {
-        const result = validateComparisonFiles(oldFile.totalPages, doc.totalPages, oldFile.pages, doc.pages)
-        if (!result.valid) setError(result.error ?? 'エラー')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラー')
-    } finally {
-      setLoadingNew(false)
-    }
-  }
+  const handleOldFile = (f: File) => handleFile('old', f)
+  const handleNewFile = (f: File) => handleFile('new', f)
 
   const handleExport = async (side: 'old' | 'new') => {
     const file = side === 'old' ? oldFile : newFile
@@ -117,27 +116,26 @@ export function ComparisonPage() {
     }
   }
 
-  const rotation = 0 // comparison mode doesn't support rotation
+  const rotation = 0
 
   const oldAnnotationKey = oldFile ? `${oldFile.id}:${oldPage}` : ''
-  const newAnnotationKey = newFile ? `${newFile.id}:${oldPage}` : ''
+  const newAnnotationKey = newFile ? `${newFile.id}:${newPage}` : ''
   const activeKey = activePanel === 'old' ? oldAnnotationKey : newAnnotationKey
 
   const bothLoaded = oldFile && newFile
 
   return (
     <div className="flex h-full flex-col">
-      {/* Global D&D — loads into whichever panel is active */}
       <GlobalDropZone
         onFile={activePanel === 'old' ? handleOldFile : handleNewFile}
         label={`${activePanel === 'old' ? '旧版' : '新版'}にドロップ`}
       />
 
-      {/* Toolbar */}
-      <div className="flex h-14 shrink-0 items-center gap-6 border-b border-slate-200 bg-white px-6">
+      {/* ── Comparison toolbar ── */}
+      <div className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-6">
 
-        {/* Layout toggle — icon + label */}
-        <div className="flex items-center gap-1 rounded-2xl bg-slate-100 p-1">
+        {/* Layout toggle */}
+        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
           {[
             { value: 'sideBySide' as const, icon: Columns2, label: '並列' },
             { value: 'overlay'    as const, icon: Layers,   label: '重ね' },
@@ -146,7 +144,7 @@ export function ComparisonPage() {
               key={value}
               onClick={() => setLayout(value)}
               className={cn(
-                'flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all',
+                'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
                 layout === value
                   ? 'bg-white text-slate-800 shadow-sm'
                   : 'text-slate-400 hover:text-slate-600',
@@ -186,7 +184,7 @@ export function ComparisonPage() {
             <div className="h-5 w-px bg-slate-200" />
             <div className="flex items-center gap-3">
               <span className="text-sm text-slate-400">注釈対象</span>
-              <div className="flex items-center gap-1 rounded-2xl bg-slate-100 p-1">
+              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
                 {[
                   { value: 'old' as const, label: '旧版' },
                   { value: 'new' as const, label: '新版' },
@@ -195,9 +193,9 @@ export function ComparisonPage() {
                     key={value}
                     onClick={() => setActivePanel(value)}
                     className={cn(
-                      'rounded-xl px-5 py-2 text-sm font-semibold transition-all',
+                      'rounded-lg px-4 py-2 text-sm font-semibold transition-all',
                       activePanel === value
-                        ? 'bg-blue-600 text-white shadow-sm'
+                        ? 'bg-indigo-600 text-white shadow-sm'
                         : 'text-slate-400 hover:text-slate-600',
                     )}
                   >
@@ -212,7 +210,7 @@ export function ComparisonPage() {
         <div className="flex-1" />
 
         {error && (
-          <p className="text-xs text-red-500 max-w-xs truncate" title={error}>{error}</p>
+          <p className="rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-500 max-w-xs truncate" title={error}>{error}</p>
         )}
       </div>
 
@@ -290,6 +288,24 @@ interface SideBySideProps {
   loadingNew: boolean
 }
 
+function PanelHeader({ label, filename, accent }: { label: string; filename?: string; accent?: boolean }) {
+  return (
+    <div className="flex h-12 items-center gap-3 border-b border-slate-100 bg-white px-6">
+      <span className={cn(
+        'shrink-0 rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wide',
+        accent
+          ? 'bg-indigo-100 text-indigo-600'
+          : 'bg-slate-100 text-slate-500',
+      )}>
+        {label}
+      </span>
+      {filename && (
+        <span className="truncate text-sm text-slate-400">{filename}</span>
+      )}
+    </div>
+  )
+}
+
 function SideBySideLayout({
   oldFile, newFile, oldHandle, newHandle, page, oldZoom, newZoom, rotation, activePanel,
   onPageChange, onOldZoomChange, onNewZoomChange, onOldFile, onNewFile, loadingOld, loadingNew,
@@ -297,10 +313,7 @@ function SideBySideLayout({
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="flex flex-1 flex-col border-r border-slate-200">
-        <div className="flex h-9 items-center gap-2.5 border-b border-slate-100 bg-white px-4">
-          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 uppercase tracking-wide">旧版</span>
-          {oldFile && <span className="truncate text-xs text-slate-400">{oldFile.name}</span>}
-        </div>
+        <PanelHeader label="旧版" filename={oldFile?.name} />
         {oldFile ? (
           <DocumentViewer
             file={oldFile}
@@ -316,20 +329,13 @@ function SideBySideLayout({
           />
         ) : (
           <div className="flex flex-1 items-center justify-center bg-slate-50">
-            {loadingOld ? (
-              <p className="text-sm text-blue-600">読み込み中...</p>
-            ) : (
-              <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />
-            )}
+            {loadingOld ? <LoadingSpinner /> : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />}
           </div>
         )}
       </div>
 
       <div className="flex flex-1 flex-col">
-        <div className="flex h-9 items-center gap-2.5 border-b border-slate-100 bg-white px-4">
-          <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-600 uppercase tracking-wide">新版</span>
-          {newFile && <span className="truncate text-xs text-slate-400">{newFile.name}</span>}
-        </div>
+        <PanelHeader label="新版" filename={newFile?.name} accent />
         {newFile ? (
           <DocumentViewer
             file={newFile}
@@ -345,11 +351,7 @@ function SideBySideLayout({
           />
         ) : (
           <div className="flex flex-1 items-center justify-center bg-slate-50">
-            {loadingNew ? (
-              <p className="text-sm text-blue-600">読み込み中...</p>
-            ) : (
-              <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />
-            )}
+            {loadingNew ? <LoadingSpinner /> : <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />}
           </div>
         )}
       </div>
@@ -381,14 +383,15 @@ function OverlayLayout({
 }: OverlayProps) {
   if (!oldFile && !newFile) {
     return (
-      <div className="flex flex-1 gap-6 items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-sm font-medium text-slate-600">旧版</span>
-          {loadingOld ? <p className="text-sm text-blue-600">読み込み中...</p> : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />}
+      <div className="flex flex-1 gap-10 items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <span className="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-500">旧版</span>
+          {loadingOld ? <LoadingSpinner /> : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />}
         </div>
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-sm font-medium text-slate-600">新版</span>
-          {loadingNew ? <p className="text-sm text-blue-600">読み込み中...</p> : <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />}
+        <div className="h-20 w-px bg-slate-200" />
+        <div className="flex flex-col items-center gap-4">
+          <span className="rounded-md bg-indigo-100 px-3 py-1.5 text-sm font-semibold text-indigo-600">新版</span>
+          {loadingNew ? <LoadingSpinner /> : <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />}
         </div>
       </div>
     )
@@ -399,7 +402,6 @@ function OverlayLayout({
 
   return (
     <div className="relative flex flex-1 overflow-hidden">
-      {/* Old (bottom) */}
       <div className="absolute inset-0">
         <DocumentViewer
           file={baseFile}
@@ -415,7 +417,6 @@ function OverlayLayout({
         />
       </div>
 
-      {/* New (top, transparent) */}
       {newFile && oldFile && (
         <div
           className="pointer-events-none absolute inset-0"
@@ -436,16 +437,17 @@ function OverlayLayout({
         </div>
       )}
 
-      {/* Load buttons if not loaded */}
       {(!oldFile || !newFile) && (
-        <div className="absolute bottom-4 right-4 flex gap-2">
+        <div className="absolute bottom-6 right-6 flex gap-3">
           {!oldFile && (
-            loadingOld ? <span className="text-xs text-blue-600">読込中...</span>
-            : <FileDropzone onFile={onOldFile} label="旧版" compact className="!w-auto" />
+            loadingOld
+              ? <span className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm">読込中...</span>
+              : <FileDropzone onFile={onOldFile} label="旧版" compact className="!w-auto" />
           )}
           {!newFile && (
-            loadingNew ? <span className="text-xs text-blue-600">読込中...</span>
-            : <FileDropzone onFile={onNewFile} label="新版" compact className="!w-auto" />
+            loadingNew
+              ? <span className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm">読込中...</span>
+              : <FileDropzone onFile={onNewFile} label="新版" compact className="!w-auto" />
           )}
         </div>
       )}

@@ -20,39 +20,41 @@ export default function App() {
       <div className="flex h-screen flex-col bg-slate-100">
 
         {/* ══ Header ══ */}
-        <header className="flex h-16 shrink-0 items-center border-b border-slate-200 bg-white px-8">
+        <header className="flex h-16 shrink-0 items-center gap-6 border-b border-slate-800 bg-slate-900 px-8">
 
-          {/* Left: logo */}
-          <div className="flex flex-1 items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-sm">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
               <FileSearch className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-[13px] font-bold leading-tight text-slate-800">図面検図</p>
-              <p className="text-[10px] leading-tight text-slate-400 mt-0.5">Drawing Inspection Tool</p>
+              <p className="text-[14px] font-bold leading-tight text-white tracking-tight">図面検図</p>
+              <p className="text-[11px] leading-tight text-slate-500 mt-0.5">Drawing Inspection Tool</p>
             </div>
           </div>
 
-          {/* Center: tab switcher */}
-          <div className="flex items-center gap-1 rounded-xl bg-blue-50 p-1">
+          {/* Divider */}
+          <div className="h-6 w-px bg-slate-700" />
+
+          {/* Tab switcher */}
+          <nav className="flex items-center gap-1">
             {TABS.map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-6 py-2 text-sm font-semibold transition-all',
+                  'flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all',
                   tab === value
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-blue-400 hover:text-blue-600',
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60',
                 )}
               >
                 <Icon className="h-4 w-4" />
                 {label}
               </button>
             ))}
-          </div>
+          </nav>
 
-          {/* Right: reserved for future actions */}
           <div className="flex-1" />
         </header>
 
