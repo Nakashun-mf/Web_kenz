@@ -1,10 +1,8 @@
 import { useEffect } from 'react'
 import { useAnnotationStore } from '@/store/annotationStore'
-import { useDocumentStore } from '@/store/documentStore'
 
 export function useKeyboard() {
-  const { undo, redo, deleteAnnotation, annotations } = useAnnotationStore()
-  const { file, currentPage } = useDocumentStore()
+  const { undo, redo } = useAnnotationStore()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -27,5 +25,5 @@ export function useKeyboard() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo, deleteAnnotation, annotations, file, currentPage])
+  }, [undo, redo])
 }
