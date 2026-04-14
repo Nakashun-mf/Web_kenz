@@ -44,6 +44,15 @@ async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy:
   }
 }
 
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
+      <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      読み込み中...
+    </div>
+  )
+}
+
 export function ComparisonPage() {
   const {
     oldFile, newFile, layout, overlayOpacity, activePanel,
@@ -62,41 +71,34 @@ export function ComparisonPage() {
   const [loadingNew, setLoadingNew] = useState(false)
   const [exporting, setExporting] = useState(false)
 
-  const handleOldFile = async (f: File) => {
-    setLoadingOld(true)
+  const handleFile = async (side: 'old' | 'new', f: File) => {
+    const setLoading = side === 'old' ? setLoadingOld : setLoadingNew
+    const setFile = side === 'old' ? setOldFile : setNewFile
+    const handleRef = side === 'old' ? oldHandleRef : newHandleRef
+    const otherFile = side === 'old' ? newFile : oldFile
+
+    setLoading(true)
     setError(null)
     try {
       const { doc, pdfProxy, tifFrames } = await loadDocumentFile(f)
-      oldHandleRef.current = { pdfProxy, tifFrames }
-      setOldFile(doc)
-      if (newFile) {
-        const result = validateComparisonFiles(doc.totalPages, newFile.totalPages, doc.pages, newFile.pages)
+      handleRef.current = { pdfProxy, tifFrames }
+      setFile(doc)
+      if (otherFile) {
+        const [aPagesCount, bPagesCount, aPages, bPages] = side === 'old'
+          ? [doc.totalPages, otherFile.totalPages, doc.pages, otherFile.pages]
+          : [otherFile.totalPages, doc.totalPages, otherFile.pages, doc.pages]
+        const result = validateComparisonFiles(aPagesCount, bPagesCount, aPages, bPages)
         if (!result.valid) setError(result.error ?? 'エラー')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラー')
     } finally {
-      setLoadingOld(false)
+      setLoading(false)
     }
   }
 
-  const handleNewFile = async (f: File) => {
-    setLoadingNew(true)
-    setError(null)
-    try {
-      const { doc, pdfProxy, tifFrames } = await loadDocumentFile(f)
-      newHandleRef.current = { pdfProxy, tifFrames }
-      setNewFile(doc)
-      if (oldFile) {
-        const result = validateComparisonFiles(oldFile.totalPages, doc.totalPages, oldFile.pages, doc.pages)
-        if (!result.valid) setError(result.error ?? 'エラー')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラー')
-    } finally {
-      setLoadingNew(false)
-    }
-  }
+  const handleOldFile = (f: File) => handleFile('old', f)
+  const handleNewFile = (f: File) => handleFile('new', f)
 
   const handleExport = async (side: 'old' | 'new') => {
     const file = side === 'old' ? oldFile : newFile
@@ -327,14 +329,7 @@ function SideBySideLayout({
           />
         ) : (
           <div className="flex flex-1 items-center justify-center bg-slate-50">
-            {loadingOld ? (
-              <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-                読み込み中...
-              </div>
-            ) : (
-              <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />
-            )}
+            {loadingOld ? <LoadingSpinner /> : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />}
           </div>
         )}
       </div>
@@ -356,14 +351,7 @@ function SideBySideLayout({
           />
         ) : (
           <div className="flex flex-1 items-center justify-center bg-slate-50">
-            {loadingNew ? (
-              <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-                読み込み中...
-              </div>
-            ) : (
-              <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />
-            )}
+            {loadingNew ? <LoadingSpinner /> : <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />}
           </div>
         )}
       </div>
@@ -398,24 +386,12 @@ function OverlayLayout({
       <div className="flex flex-1 gap-10 items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <span className="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-500">旧版</span>
-          {loadingOld
-            ? <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-                読み込み中...
-              </div>
-            : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />
-          }
+          {loadingOld ? <LoadingSpinner /> : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />}
         </div>
         <div className="h-20 w-px bg-slate-200" />
         <div className="flex flex-col items-center gap-4">
           <span className="rounded-md bg-indigo-100 px-3 py-1.5 text-sm font-semibold text-indigo-600">新版</span>
-          {loadingNew
-            ? <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-                読み込み中...
-              </div>
-            : <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />
-          }
+          {loadingNew ? <LoadingSpinner /> : <FileDropzone onFile={onNewFile} label="新版を読み込む" compact />}
         </div>
       </div>
     )
