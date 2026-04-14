@@ -130,10 +130,10 @@ export function ComparisonPage() {
       />
 
       {/* ── Comparison toolbar ── */}
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4">
+      <div className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-6">
 
         {/* Layout toggle */}
-        <div className="flex items-center gap-0.5 rounded-xl bg-slate-100 p-1">
+        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
           {[
             { value: 'sideBySide' as const, icon: Columns2, label: '並列' },
             { value: 'overlay'    as const, icon: Layers,   label: '重ね' },
@@ -142,13 +142,13 @@ export function ComparisonPage() {
               key={value}
               onClick={() => setLayout(value)}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
+                'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
                 layout === value
                   ? 'bg-white text-slate-800 shadow-sm'
                   : 'text-slate-400 hover:text-slate-600',
               )}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-4 w-4" />
               {label}
             </button>
           ))}
@@ -157,10 +157,10 @@ export function ComparisonPage() {
         {/* Overlay opacity */}
         {layout === 'overlay' && (
           <>
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2.5">
-              <span className="text-xs text-slate-400">透過率</span>
-              <div className="w-28">
+            <div className="h-5 w-px bg-slate-200" />
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-400">透過率</span>
+              <div className="w-32">
                 <Slider
                   value={[overlayOpacity * 100]}
                   min={0}
@@ -169,7 +169,7 @@ export function ComparisonPage() {
                   onValueChange={([v]) => setOverlayOpacity(v / 100)}
                 />
               </div>
-              <span className="w-9 text-xs font-semibold text-slate-600">
+              <span className="w-10 text-sm font-semibold text-slate-600">
                 {Math.round(overlayOpacity * 100)}%
               </span>
             </div>
@@ -179,10 +179,10 @@ export function ComparisonPage() {
         {/* Active panel selector */}
         {bothLoaded && (
           <>
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">注釈対象</span>
-              <div className="flex items-center gap-0.5 rounded-xl bg-slate-100 p-1">
+            <div className="h-5 w-px bg-slate-200" />
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-400">注釈対象</span>
+              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
                 {[
                   { value: 'old' as const, label: '旧版' },
                   { value: 'new' as const, label: '新版' },
@@ -191,7 +191,7 @@ export function ComparisonPage() {
                     key={value}
                     onClick={() => setActivePanel(value)}
                     className={cn(
-                      'rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all',
+                      'rounded-lg px-4 py-2 text-sm font-semibold transition-all',
                       activePanel === value
                         ? 'bg-indigo-600 text-white shadow-sm'
                         : 'text-slate-400 hover:text-slate-600',
@@ -208,7 +208,7 @@ export function ComparisonPage() {
         <div className="flex-1" />
 
         {error && (
-          <p className="rounded-lg bg-red-50 px-2.5 py-1 text-xs font-medium text-red-500 max-w-xs truncate" title={error}>{error}</p>
+          <p className="rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-500 max-w-xs truncate" title={error}>{error}</p>
         )}
       </div>
 
@@ -288,9 +288,9 @@ interface SideBySideProps {
 
 function PanelHeader({ label, filename, accent }: { label: string; filename?: string; accent?: boolean }) {
   return (
-    <div className="flex h-9 items-center gap-2 border-b border-slate-100 bg-white px-4">
+    <div className="flex h-11 items-center gap-3 border-b border-slate-100 bg-white px-5">
       <span className={cn(
-        'shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+        'shrink-0 rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide',
         accent
           ? 'bg-indigo-100 text-indigo-600'
           : 'bg-slate-100 text-slate-500',
@@ -298,7 +298,7 @@ function PanelHeader({ label, filename, accent }: { label: string; filename?: st
         {label}
       </span>
       {filename && (
-        <span className="truncate text-xs text-slate-400">{filename}</span>
+        <span className="truncate text-sm text-slate-400">{filename}</span>
       )}
     </div>
   )
@@ -328,7 +328,7 @@ function SideBySideLayout({
         ) : (
           <div className="flex flex-1 items-center justify-center bg-slate-50">
             {loadingOld ? (
-              <div className="flex items-center gap-2 text-sm font-medium text-indigo-600">
+              <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
                 読み込み中...
               </div>
@@ -357,7 +357,7 @@ function SideBySideLayout({
         ) : (
           <div className="flex flex-1 items-center justify-center bg-slate-50">
             {loadingNew ? (
-              <div className="flex items-center gap-2 text-sm font-medium text-indigo-600">
+              <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
                 読み込み中...
               </div>
@@ -395,22 +395,22 @@ function OverlayLayout({
 }: OverlayProps) {
   if (!oldFile && !newFile) {
     return (
-      <div className="flex flex-1 gap-8 items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3">
-          <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">旧版</span>
+      <div className="flex flex-1 gap-10 items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <span className="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-500">旧版</span>
           {loadingOld
-            ? <div className="flex items-center gap-2 text-sm font-medium text-indigo-600">
+            ? <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
                 読み込み中...
               </div>
             : <FileDropzone onFile={onOldFile} label="旧版を読み込む" compact />
           }
         </div>
-        <div className="h-16 w-px bg-slate-200" />
-        <div className="flex flex-col items-center gap-3">
-          <span className="rounded-md bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-600">新版</span>
+        <div className="h-20 w-px bg-slate-200" />
+        <div className="flex flex-col items-center gap-4">
+          <span className="rounded-md bg-indigo-100 px-3 py-1.5 text-sm font-semibold text-indigo-600">新版</span>
           {loadingNew
-            ? <div className="flex items-center gap-2 text-sm font-medium text-indigo-600">
+            ? <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
                 読み込み中...
               </div>
@@ -426,7 +426,6 @@ function OverlayLayout({
 
   return (
     <div className="relative flex flex-1 overflow-hidden">
-      {/* Old (bottom) */}
       <div className="absolute inset-0">
         <DocumentViewer
           file={baseFile}
@@ -442,7 +441,6 @@ function OverlayLayout({
         />
       </div>
 
-      {/* New (top, transparent) */}
       {newFile && oldFile && (
         <div
           className="pointer-events-none absolute inset-0"
@@ -463,17 +461,16 @@ function OverlayLayout({
         </div>
       )}
 
-      {/* Load buttons if not loaded */}
       {(!oldFile || !newFile) && (
-        <div className="absolute bottom-4 right-4 flex gap-2">
+        <div className="absolute bottom-6 right-6 flex gap-3">
           {!oldFile && (
             loadingOld
-              ? <span className="rounded-xl bg-white/90 px-3 py-1.5 text-xs font-medium text-indigo-600 shadow-sm">読込中...</span>
+              ? <span className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm">読込中...</span>
               : <FileDropzone onFile={onOldFile} label="旧版" compact className="!w-auto" />
           )}
           {!newFile && (
             loadingNew
-              ? <span className="rounded-xl bg-white/90 px-3 py-1.5 text-xs font-medium text-indigo-600 shadow-sm">読込中...</span>
+              ? <span className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm">読込中...</span>
               : <FileDropzone onFile={onNewFile} label="新版" compact className="!w-auto" />
           )}
         </div>

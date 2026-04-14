@@ -2,7 +2,7 @@ import * as pdfjsLib from 'pdfjs-dist'
 import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import type { PageInfo } from '@/types/document'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+pdfjsLib.GlobalWorkerOptions.workerSrc = import.meta.env.BASE_URL + 'pdf.worker.min.mjs'
 
 export async function loadPdf(buffer: ArrayBuffer): Promise<PDFDocumentProxy> {
   const loadingTask = pdfjsLib.getDocument({ data: buffer })
