@@ -16,34 +16,33 @@ export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPa
   }, [currentPage])
 
   return (
-    <div className="flex h-full flex-col border-r border-slate-200 bg-white">
+    <div className="flex h-full flex-col border-r border-slate-200 bg-zinc-50">
       {/* Header */}
-      <div className="border-b border-slate-100 px-5 py-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-          Pages&nbsp;
-          <span className="font-bold text-slate-600">{pages.length}</span>
-        </p>
+      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Pages</p>
+        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+          {pages.length}
+        </span>
       </div>
 
       {/* Thumbnail list */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-2">
         {pages.map((page, index) => (
           <button
             key={index}
             ref={index === currentPage ? activeRef : undefined}
             onClick={() => onPageSelect(index)}
             className={cn(
-              'group w-full rounded-2xl border-2 p-2.5 text-left transition-all',
-              'hover:border-blue-400 hover:bg-blue-50/60 hover:shadow-sm',
+              'group w-full rounded-xl p-2 text-left transition-all',
               index === currentPage
-                ? 'border-blue-600 bg-blue-50 shadow-sm'
-                : 'border-transparent bg-slate-50',
+                ? 'bg-white shadow-sm ring-2 ring-indigo-500/70'
+                : 'hover:bg-white hover:shadow-sm ring-2 ring-transparent hover:ring-slate-200/80',
             )}
           >
             {/* Thumbnail image */}
             <div
-              className="relative mx-auto overflow-hidden rounded-xl bg-white shadow-sm"
-              style={{ aspectRatio: `${page.widthPt} / ${page.heightPt}`, maxWidth: 108 }}
+              className="relative mx-auto overflow-hidden rounded-lg bg-white shadow-sm border border-slate-100"
+              style={{ aspectRatio: `${page.widthPt} / ${page.heightPt}`, maxWidth: 104 }}
             >
               {page.thumbnailDataUrl ? (
                 <img
@@ -52,16 +51,16 @@ export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPa
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <div className="flex h-full min-h-[80px] items-center justify-center bg-slate-100">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                <div className="flex h-full min-h-[72px] items-center justify-center bg-slate-50">
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
                 </div>
               )}
             </div>
 
             {/* Page number */}
             <p className={cn(
-              'mt-2 text-center text-[11px] font-semibold',
-              index === currentPage ? 'text-blue-700' : 'text-slate-400',
+              'mt-1.5 text-center text-[10px] font-semibold',
+              index === currentPage ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500',
             )}>
               {index + 1}
             </p>

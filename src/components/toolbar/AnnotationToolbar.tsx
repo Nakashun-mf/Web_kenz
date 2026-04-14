@@ -29,17 +29,16 @@ const BG_COLORS: { value: AnnotationBgColor; label: string; cls: string }[] = [
   { value: 'yellow',      label: '黄',   cls: 'bg-yellow-200 border border-yellow-400' },
 ]
 
-// ── Shared icon button ──────────────────────────────────────────
-function IconBtn({
+// ── Vertical toolbar icon button (dark bg) ──────────────────────
+function DarkIconBtn({
   onClick, active = false, danger = false, disabled = false,
-  title, side, children,
+  title, children,
 }: {
   onClick: () => void
   active?: boolean
   danger?: boolean
   disabled?: boolean
   title: string
-  side: 'top' | 'right' | 'bottom' | 'left'
   children: React.ReactNode
 }) {
   return (
@@ -49,17 +48,17 @@ function IconBtn({
           onClick={onClick}
           disabled={disabled}
           className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-xl transition-all',
-            active  && 'bg-blue-600 text-white shadow-sm',
-            !active && !danger && 'text-slate-500 hover:bg-slate-100 hover:text-slate-800',
-            !active && danger  && 'text-slate-400 hover:bg-red-50 hover:text-red-500',
-            disabled && 'pointer-events-none opacity-30',
+            'flex h-9 w-9 items-center justify-center rounded-lg transition-all',
+            active  && 'bg-indigo-600 text-white shadow-sm',
+            !active && !danger && 'text-slate-400 hover:bg-slate-800 hover:text-slate-100',
+            !active && danger  && 'text-slate-500 hover:bg-red-500/15 hover:text-red-400',
+            disabled && 'pointer-events-none opacity-25',
           )}
         >
           {children}
         </button>
       </TooltipTrigger>
-      <TooltipContent side={side}>{title}</TooltipContent>
+      <TooltipContent side="right">{title}</TooltipContent>
     </Tooltip>
   )
 }
@@ -81,73 +80,70 @@ function VerticalToolbar({
   exportLoading?: boolean
 }) {
   return (
-    <div className="relative flex h-full w-14 shrink-0 flex-col items-center border-r border-slate-200 bg-white py-4">
+    <div className="relative flex h-full w-[52px] shrink-0 flex-col items-center border-r border-slate-800 bg-slate-900 py-3 gap-1">
+
       {/* Drawing tools */}
-      <div className="flex flex-col items-center gap-1 px-2">
+      <div className="flex flex-col items-center gap-0.5">
         {TOOLS.map(({ id, icon: Icon, label }) => (
-          <IconBtn
+          <DarkIconBtn
             key={id}
             onClick={() => setActiveTool(id)}
             active={activeTool === id}
             title={label}
-            side="right"
           >
-            <Icon className="h-[18px] w-[18px]" />
-          </IconBtn>
+            <Icon className="h-[17px] w-[17px]" />
+          </DarkIconBtn>
         ))}
       </div>
 
-      <div className="my-3 h-px w-8 bg-slate-200" />
+      {/* Divider */}
+      <div className="my-1 h-px w-7 shrink-0 bg-slate-800" />
 
       {/* History */}
-      <div className="flex flex-col items-center gap-1 px-2">
-        <IconBtn onClick={undo} title="元に戻す (Ctrl+Z)" side="right">
-          <Undo2 className="h-[18px] w-[18px]" />
-        </IconBtn>
-        <IconBtn onClick={redo} title="やり直し (Ctrl+Y)" side="right">
-          <Redo2 className="h-[18px] w-[18px]" />
-        </IconBtn>
+      <div className="flex flex-col items-center gap-0.5">
+        <DarkIconBtn onClick={undo} title="元に戻す (Ctrl+Z)">
+          <Undo2 className="h-[17px] w-[17px]" />
+        </DarkIconBtn>
+        <DarkIconBtn onClick={redo} title="やり直し (Ctrl+Y)">
+          <Redo2 className="h-[17px] w-[17px]" />
+        </DarkIconBtn>
       </div>
 
-      <div className="my-3 h-px w-8 bg-slate-200" />
+      {/* Divider */}
+      <div className="my-1 h-px w-7 shrink-0 bg-slate-800" />
 
       {/* Clear */}
-      <div className="px-2">
-        <IconBtn
-          onClick={handleClear}
-          disabled={pageAnnotations.length === 0}
-          danger
-          title="全消去"
-          side="right"
-        >
-          <Trash2 className="h-[18px] w-[18px]" />
-        </IconBtn>
-      </div>
+      <DarkIconBtn
+        onClick={handleClear}
+        disabled={pageAnnotations.length === 0}
+        danger
+        title="全消去"
+      >
+        <Trash2 className="h-[17px] w-[17px]" />
+      </DarkIconBtn>
 
       <div className="flex-1" />
 
       {/* Export */}
       {onExport && (
-        <div className="px-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onExport}
-                disabled={exportLoading}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-60"
-              >
-                <Download className="h-[18px] w-[18px]" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">{exportLoading ? '出力中…' : 'PDF 出力'}</TooltipContent>
-          </Tooltip>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onExport}
+              disabled={exportLoading}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm transition-all hover:bg-indigo-500 disabled:opacity-50"
+            >
+              <Download className="h-[17px] w-[17px]" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{exportLoading ? '出力中…' : 'PDF 出力'}</TooltipContent>
+        </Tooltip>
       )}
 
       {/* Text props — floating panel */}
       {activeTool === 'text' && (
-        <div className="absolute left-full top-4 z-50 ml-2 w-60 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="absolute left-full top-3 z-50 ml-2 w-56 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             テキスト設定
           </p>
           <div className="space-y-3">
@@ -159,7 +155,7 @@ function VerticalToolbar({
                 min={8}
                 max={72}
                 onChange={(e) => setActiveProps({ fontSize: Number(e.target.value) })}
-                className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-center text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-14 rounded-lg border border-slate-200 px-2 py-1 text-center text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
             <div className="flex items-center justify-between">
@@ -168,7 +164,7 @@ function VerticalToolbar({
                 onClick={() => setActiveProps({ showBorder: !activeProps.showBorder })}
                 className={cn(
                   'rounded-lg px-3 py-1 text-xs font-semibold transition-colors',
-                  activeProps.showBorder ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500',
+                  activeProps.showBorder ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500',
                 )}
               >
                 {activeProps.showBorder ? 'あり' : 'なし'}
@@ -185,7 +181,7 @@ function VerticalToolbar({
                         className={cn(
                           'h-6 w-6 rounded-full transition-all',
                           cls,
-                          activeProps.bgColor === value && 'ring-2 ring-blue-500 ring-offset-1',
+                          activeProps.bgColor === value && 'ring-2 ring-indigo-500 ring-offset-1',
                         )}
                       />
                     </TooltipTrigger>
@@ -218,8 +214,8 @@ function HorizontalToolbar({
   exportLoading?: boolean
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-5 py-2.5">
-      {/* Tools */}
+    <div className="flex items-center gap-2 border-b border-slate-200 bg-white px-4 py-2">
+      {/* Drawing tools */}
       <div className="flex items-center gap-0.5 rounded-xl bg-slate-100 p-1">
         {TOOLS.map(({ id, icon: Icon, label }) => (
           <Tooltip key={id}>
@@ -227,13 +223,13 @@ function HorizontalToolbar({
               <button
                 onClick={() => setActiveTool(id)}
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-lg transition-all',
+                  'flex h-7 w-7 items-center justify-center rounded-lg transition-all',
                   activeTool === id
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-500 hover:bg-white hover:text-slate-800',
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom">{label}</TooltipContent>
@@ -243,33 +239,33 @@ function HorizontalToolbar({
 
       {/* Text props inline */}
       {activeTool === 'text' && (
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5">
+        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5">
           <span className="text-xs text-slate-400">サイズ</span>
           <input
             type="number"
             value={activeProps.fontSize}
             min={8} max={72}
             onChange={(e) => setActiveProps({ fontSize: Number(e.target.value) })}
-            className="w-14 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-12 rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
-          <div className="h-4 w-px bg-slate-200" />
+          <div className="h-3.5 w-px bg-slate-200" />
           <button
             onClick={() => setActiveProps({ showBorder: !activeProps.showBorder })}
             className={cn(
-              'rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors',
-              activeProps.showBorder ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500',
+              'rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-colors',
+              activeProps.showBorder ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500',
             )}
           >
             {activeProps.showBorder ? '枠あり' : '枠なし'}
           </button>
-          <div className="h-4 w-px bg-slate-200" />
+          <div className="h-3.5 w-px bg-slate-200" />
           <div className="flex gap-1.5">
             {BG_COLORS.map(({ value, label, cls }) => (
               <Tooltip key={value}>
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => setActiveProps({ bgColor: value })}
-                    className={cn('h-5 w-5 rounded-full', cls, activeProps.bgColor === value && 'ring-2 ring-blue-500 ring-offset-1')}
+                    className={cn('h-4.5 w-4.5 rounded-full', cls, activeProps.bgColor === value && 'ring-2 ring-indigo-500 ring-offset-1')}
                   />
                 </TooltipTrigger>
                 <TooltipContent side="bottom">{label}</TooltipContent>
@@ -285,16 +281,16 @@ function HorizontalToolbar({
       <div className="flex items-center gap-0.5 rounded-xl bg-slate-100 p-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <button onClick={undo} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-white hover:text-slate-800">
-              <Undo2 className="h-4 w-4" />
+            <button onClick={undo} className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-white hover:text-slate-800">
+              <Undo2 className="h-3.5 w-3.5" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="bottom">元に戻す (Ctrl+Z)</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button onClick={redo} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-white hover:text-slate-800">
-              <Redo2 className="h-4 w-4" />
+            <button onClick={redo} className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-white hover:text-slate-800">
+              <Redo2 className="h-3.5 w-3.5" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="bottom">やり直し (Ctrl+Y)</TooltipContent>
@@ -304,9 +300,9 @@ function HorizontalToolbar({
             <button
               onClick={handleClear}
               disabled={pageAnnotations.length === 0}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-red-50 hover:text-red-500 disabled:pointer-events-none disabled:opacity-30"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-red-50 hover:text-red-500 disabled:pointer-events-none disabled:opacity-30"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="bottom">全消去</TooltipContent>
@@ -318,7 +314,7 @@ function HorizontalToolbar({
         <button
           onClick={onExport}
           disabled={exportLoading}
-          className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 disabled:opacity-60"
         >
           <Download className="h-3.5 w-3.5" />
           {exportLoading ? '出力中…' : 'PDF 出力'}
