@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import {
   MousePointer, Pencil, Minus, Square, Circle, Type,
   Undo2, Redo2, Trash2, Download,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { useAnnotationStore } from '@/store/annotationStore'
 import { cn } from '@/lib/utils'
-import type { AnnotationTool, AnnotationBgColor } from '@/types/annotation'
+import type { AnnotationTool, AnnotationBgColor, AnnotationProps, Annotation } from '@/types/annotation'
 
 interface AnnotationToolbarProps {
   annotationKey: string
@@ -28,6 +31,20 @@ const BG_COLORS: { value: AnnotationBgColor; label: string; cls: string }[] = [
   { value: 'white',       label: '白',   cls: 'bg-white border border-slate-300' },
   { value: 'yellow',      label: '黄',   cls: 'bg-yellow-200 border border-yellow-400' },
 ]
+
+// ── Shared props type for internal toolbar sub-components ───────
+type ToolbarCoreProps = {
+  activeTool: AnnotationTool
+  setActiveTool: (t: AnnotationTool) => void
+  activeProps: AnnotationProps
+  setActiveProps: (p: Partial<AnnotationProps>) => void
+  undo: () => void
+  redo: () => void
+  pageAnnotations: Annotation[]
+  handleClear: () => void
+  onExport?: () => void
+  exportLoading?: boolean
+}
 
 // ── Vertical toolbar icon button (dark bg) ──────────────────────
 function DarkIconBtn({
@@ -67,18 +84,7 @@ function DarkIconBtn({
 function VerticalToolbar({
   activeTool, setActiveTool, activeProps, setActiveProps,
   undo, redo, pageAnnotations, handleClear, onExport, exportLoading,
-}: {
-  activeTool: AnnotationTool
-  setActiveTool: (t: AnnotationTool) => void
-  activeProps: { fontSize: number; showBorder: boolean; bgColor: AnnotationBgColor }
-  setActiveProps: (p: Partial<{ fontSize: number; showBorder: boolean; bgColor: AnnotationBgColor }>) => void
-  undo: () => void
-  redo: () => void
-  pageAnnotations: unknown[]
-  handleClear: () => void
-  onExport?: () => void
-  exportLoading?: boolean
-}) {
+}: ToolbarCoreProps) {
   return (
     <div className="relative flex h-full w-[68px] shrink-0 flex-col items-center border-r border-slate-800 bg-slate-900 py-5">
 
@@ -203,18 +209,7 @@ function VerticalToolbar({
 function HorizontalToolbar({
   activeTool, setActiveTool, activeProps, setActiveProps,
   undo, redo, pageAnnotations, handleClear, onExport, exportLoading,
-}: {
-  activeTool: AnnotationTool
-  setActiveTool: (t: AnnotationTool) => void
-  activeProps: { fontSize: number; showBorder: boolean; bgColor: AnnotationBgColor }
-  setActiveProps: (p: Partial<{ fontSize: number; showBorder: boolean; bgColor: AnnotationBgColor }>) => void
-  undo: () => void
-  redo: () => void
-  pageAnnotations: unknown[]
-  handleClear: () => void
-  onExport?: () => void
-  exportLoading?: boolean
-}) {
+}: ToolbarCoreProps) {
   return (
     <div className="flex items-center gap-4 border-b border-slate-200 bg-white px-6 py-3">
       {/* Drawing tools */}
@@ -335,16 +330,21 @@ export function AnnotationToolbar({ annotationKey, onExport, exportLoading, dire
     annotations,
   } = useAnnotationStore()
 
-  const pageAnnotations = annotations[annotationKey] ?? []
+  const [showClearDialog, setShowClearDialog] = useState(false)
+
+  const pageAnnotations: Annotation[] = annotations[annotationKey] ?? []
 
   const handleClear = () => {
     if (pageAnnotations.length === 0) return
-    if (window.confirm('このページの注釈をすべて削除しますか？')) {
-      clearAnnotations(annotationKey)
-    }
+    setShowClearDialog(true)
   }
 
-  const shared = {
+  const confirmClear = () => {
+    clearAnnotations(annotationKey)
+    setShowClearDialog(false)
+  }
+
+  const shared: ToolbarCoreProps = {
     activeTool, setActiveTool,
     activeProps, setActiveProps,
     undo, redo,
@@ -354,7 +354,31 @@ export function AnnotationToolbar({ annotationKey, onExport, exportLoading, dire
     exportLoading,
   }
 
-  return direction === 'vertical'
-    ? <VerticalToolbar {...shared} />
-    : <HorizontalToolbar {...shared} />
+  return (
+    <>
+      {direction === 'vertical'
+        ? <VerticalToolbar {...shared} />
+        : <HorizontalToolbar {...shared} />
+      }
+
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>注釈を削除</DialogTitle>
+            <DialogDescription>
+              このページの注釈をすべて削除しますか？この操作は元に戻せません。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowClearDialog(false)}>
+              キャンセル
+            </Button>
+            <Button variant="destructive" onClick={confirmClear}>
+              削除する
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
 }

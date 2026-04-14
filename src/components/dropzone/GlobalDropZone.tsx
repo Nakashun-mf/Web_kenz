@@ -18,6 +18,9 @@ export function GlobalDropZone({ onFile, label = 'ファイルをドロップ', 
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const enterCountRef = useRef(0)
+  // Stable ref so the effect never needs to re-run when onFile changes
+  const onFileRef = useRef(onFile)
+  onFileRef.current = onFile
 
   useEffect(() => {
     if (disabled) return
@@ -59,7 +62,7 @@ export function GlobalDropZone({ onFile, label = 'ファイルをドロップ', 
       }
 
       setError(null)
-      onFile(file)
+      onFileRef.current(file)
     }
 
     window.addEventListener('dragenter', handleDragEnter)
@@ -68,12 +71,13 @@ export function GlobalDropZone({ onFile, label = 'ファイルをドロップ', 
     window.addEventListener('drop', handleDrop)
 
     return () => {
+      enterCountRef.current = 0
       window.removeEventListener('dragenter', handleDragEnter)
       window.removeEventListener('dragleave', handleDragLeave)
       window.removeEventListener('dragover', handleDragOver)
       window.removeEventListener('drop', handleDrop)
     }
-  }, [disabled, onFile])
+  }, [disabled])
 
   if (!dragging && !error) return null
 

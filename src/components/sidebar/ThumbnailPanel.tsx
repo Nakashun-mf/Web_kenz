@@ -19,7 +19,7 @@ export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPa
     <div className="flex h-full flex-col border-r border-slate-200 bg-zinc-50">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Pages</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">ページ</p>
         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500">
           {pages.length}
         </span>

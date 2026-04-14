@@ -113,7 +113,8 @@ export function AnnotationLayer({
   const redraw = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || canvas.width === 0) return
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     const scale = zoom * (window.devicePixelRatio || 1)
     ctx.save()
@@ -159,8 +160,10 @@ export function AnnotationLayer({
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!drawingRef.current || !enabled) return
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
     const px = getCanvasPoint(e)
     const pt = getPtPoint(px)
     const scale = zoom * (window.devicePixelRatio || 1)
