@@ -47,8 +47,9 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           className={cn(
-            'flex items-center gap-2 rounded-lg border-2 border-dashed px-4 py-3 text-sm text-slate-500 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600',
-            dragging && 'border-blue-500 bg-blue-50 text-blue-600',
+            'flex items-center gap-2 rounded-xl border-2 border-dashed px-4 py-2.5 text-sm font-medium text-slate-500 transition-all',
+            'hover:border-indigo-400 hover:bg-indigo-50/50 hover:text-indigo-600',
+            dragging && 'border-indigo-500 bg-indigo-50 text-indigo-600 scale-[1.02]',
           )}
         >
           <Upload className="h-4 w-4 shrink-0" />
@@ -68,17 +69,24 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          'flex w-full max-w-sm flex-col items-center gap-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 px-8 py-12 text-center transition-all hover:border-blue-400 hover:bg-blue-50',
-          dragging && 'border-blue-500 bg-blue-50 scale-[1.02]',
+          'flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border-2 border-dashed px-8 py-12 text-center transition-all',
+          'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/30 shadow-sm hover:shadow-md',
+          dragging && 'border-indigo-500 bg-indigo-50/50 scale-[1.02] shadow-md',
         )}
       >
-        <div className={cn('rounded-full p-4 transition-colors', dragging ? 'bg-blue-100' : 'bg-slate-100')}>
-          <FileText className={cn('h-8 w-8', dragging ? 'text-blue-600' : 'text-slate-400')} />
+        <div className={cn(
+          'rounded-2xl p-4 transition-colors',
+          dragging ? 'bg-indigo-100' : 'bg-slate-100',
+        )}>
+          <FileText className={cn(
+            'h-8 w-8 transition-colors',
+            dragging ? 'text-indigo-600' : 'text-slate-400',
+          )} />
         </div>
         <div>
-          <p className="text-sm font-medium text-slate-700">{label}</p>
-          <p className="mt-1 text-xs text-slate-400">PDF / TIF ドラッグ&ドロップまたはクリック</p>
-          <p className="mt-0.5 text-xs text-slate-400">最大 100MB</p>
+          <p className="text-sm font-semibold text-slate-700">{label}</p>
+          <p className="mt-1 text-xs text-slate-400">PDF / TIF ドラッグ&ドロップ または クリック</p>
+          <p className="mt-0.5 text-xs text-slate-300">最大 100MB</p>
         </div>
       </button>
       {error && <p className="text-sm text-red-500">{error}</p>}
