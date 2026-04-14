@@ -20,36 +20,36 @@ export default function App() {
       <div className="flex h-screen flex-col bg-slate-100">
 
         {/* ══ Header ══ */}
-        <header className="flex h-13 shrink-0 items-center gap-5 border-b border-slate-800 bg-slate-900 px-5">
+        <header className="flex h-16 shrink-0 items-center gap-6 border-b border-slate-800 bg-slate-900 px-8">
 
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
-              <FileSearch className="h-4 w-4 text-white" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
+              <FileSearch className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-[13px] font-bold leading-tight text-white tracking-tight">図面検図</p>
-              <p className="text-[10px] leading-tight text-slate-500 mt-0.5">Drawing Inspection Tool</p>
+              <p className="text-[14px] font-bold leading-tight text-white tracking-tight">図面検図</p>
+              <p className="text-[11px] leading-tight text-slate-500 mt-0.5">Drawing Inspection Tool</p>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="h-5 w-px bg-slate-700" />
+          <div className="h-6 w-px bg-slate-700" />
 
           {/* Tab switcher */}
-          <nav className="flex items-center gap-0.5">
+          <nav className="flex items-center gap-1">
             {TABS.map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-medium transition-all',
+                  'flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all',
                   tab === value
                     ? 'bg-slate-800 text-white'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60',
                 )}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </button>
             ))}
