@@ -56,7 +56,7 @@ function LoadingSpinner() {
 export function ComparisonPage() {
   const {
     oldFile, newFile, layout, overlayOpacity, activePanel,
-    oldPage, oldZoom, newZoom,
+    oldPage, newPage, oldZoom, newZoom,
     setOldFile, setNewFile, setLayout, setOverlayOpacity, setActivePanel,
     setOldPage, setOldZoom, setNewZoom,
   } = useComparisonStore()
@@ -119,7 +119,7 @@ export function ComparisonPage() {
   const rotation = 0
 
   const oldAnnotationKey = oldFile ? `${oldFile.id}:${oldPage}` : ''
-  const newAnnotationKey = newFile ? `${newFile.id}:${oldPage}` : ''
+  const newAnnotationKey = newFile ? `${newFile.id}:${newPage}` : ''
   const activeKey = activePanel === 'old' ? oldAnnotationKey : newAnnotationKey
 
   const bothLoaded = oldFile && newFile

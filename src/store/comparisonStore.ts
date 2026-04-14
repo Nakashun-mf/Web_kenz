@@ -43,7 +43,7 @@ export const useComparisonStore = create<ComparisonState>()(
     setOverlayOpacity: (opacity) => set((state) => { state.overlayOpacity = opacity }),
     setActivePanel: (panel) => set((state) => { state.activePanel = panel }),
     setOldPage: (page) => set((state) => { state.oldPage = page; state.newPage = page }),
-    setNewPage: (page) => set((state) => { state.newPage = page; state.oldPage = page }),
+    setNewPage: (page) => set((state) => { state.newPage = page }),
     setOldZoom: (zoom) => set((state) => { state.oldZoom = Math.min(Math.max(zoom, 0.1), 8) }),
     setNewZoom: (zoom) => set((state) => { state.newZoom = Math.min(Math.max(zoom, 0.1), 8) }),
   })),
