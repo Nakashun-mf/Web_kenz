@@ -162,7 +162,11 @@ function VerticalToolbar({
                 value={activeProps.fontSize}
                 min={8}
                 max={72}
-                onChange={(e) => setActiveProps({ fontSize: Number(e.target.value) })}
+                onChange={(e) => {
+                  const v = Number(e.target.value)
+                  if (!Number.isFinite(v) || v < 8 || v > 72) return
+                  setActiveProps({ fontSize: v })
+                }}
                 className="w-16 rounded-lg border border-slate-200 px-2 py-1.5 text-center text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>

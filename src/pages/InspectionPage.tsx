@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { ArrowRight, FileText } from 'lucide-react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { TifFrame } from '@/lib/tifLoader'
@@ -37,6 +37,14 @@ export function InspectionPage() {
   const [exportError, setExportError] = useState<string | null>(null)
   const [sendSuccess, setSendSuccess] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const sendSuccessTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // アンマウント時にタイマーをクリア（メモリリーク防止）
+  useEffect(() => {
+    return () => {
+      if (sendSuccessTimerRef.current) clearTimeout(sendSuccessTimerRef.current)
+    }
+  }, [])
 
   const handleFile = async (f: File) => {
     const validation = validateFile(f)
@@ -116,7 +124,8 @@ export function InspectionPage() {
   const handleSendToComparison = () => {
     if (file) setOldFile(file)
     setSendSuccess(true)
-    setTimeout(() => setSendSuccess(false), 3000)
+    if (sendSuccessTimerRef.current) clearTimeout(sendSuccessTimerRef.current)
+    sendSuccessTimerRef.current = setTimeout(() => setSendSuccess(false), 3000)
   }
 
   /* ── Empty state ── */
