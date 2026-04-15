@@ -17,45 +17,50 @@ export default function App() {
 
   return (
     <TooltipProvider delayDuration={400}>
-      <div className="flex h-screen flex-col bg-slate-100">
+      <div className="flex h-screen flex-col bg-slate-50">
 
         {/* ══ Header ══ */}
-        <header className="flex h-16 shrink-0 items-center gap-6 border-b border-slate-800 bg-slate-900 px-8">
+        <header className="flex h-14 shrink-0 items-center gap-5 border-b border-slate-200 bg-white px-6 shadow-sm">
 
-          {/* Logo */}
+          {/* Logo mark */}
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
-              <FileSearch className="h-5 w-5 text-white" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
+              <FileSearch className="h-4 w-4 text-white" />
             </div>
-            <div>
-              <p className="text-[14px] font-bold leading-tight text-white tracking-tight">図面検図</p>
-              <p className="text-[11px] leading-tight text-slate-500 mt-0.5">Drawing Inspection Tool</p>
+            <div className="flex flex-col leading-none">
+              <span className="text-[13px] font-bold tracking-tight text-slate-900">図面検図</span>
+              <span className="mt-0.5 text-[10px] font-medium text-slate-400">Drawing Inspection</span>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="h-6 w-px bg-slate-700" />
+          <div className="h-5 w-px bg-slate-200" />
 
-          {/* Tab switcher */}
-          <nav className="flex items-center gap-1">
+          {/* Tab switcher — pill style */}
+          <nav className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
             {TABS.map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all',
+                  'flex items-center gap-2 rounded-md px-4 py-1.5 text-[13px] font-medium transition-all duration-150',
                   tab === value
-                    ? 'bg-slate-800 text-white'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60',
+                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/80'
+                    : 'text-slate-500 hover:text-slate-700',
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
                 {label}
               </button>
             ))}
           </nav>
 
           <div className="flex-1" />
+
+          {/* Version badge */}
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-400">
+            v1.0
+          </span>
         </header>
 
         {/* ══ Page content ══ */}
