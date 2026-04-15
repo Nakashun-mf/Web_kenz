@@ -16,6 +16,7 @@ import { Layers, Columns2 } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import type { DocumentFile } from '@/types/document'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 type FileHandle = {
   pdfProxy: PDFDocumentProxy | null
@@ -88,6 +89,8 @@ export function ComparisonPage() {
     setLoading(true)
     setError(null)
     try {
+      // 前のPDFドキュメントを明示的に解放（メモリリーク防止）
+      handleRef.current.pdfProxy?.destroy()
       const { doc, pdfProxy, tifFrames } = await loadDocumentFile(f)
       handleRef.current = { pdfProxy, tifFrames }
       setFile(doc)
@@ -98,7 +101,8 @@ export function ComparisonPage() {
         const result = validateComparisonFiles(aPagesCount, bPagesCount, aPages, bPages)
         if (!result.valid) setError(result.error ?? 'エラー')
       }
-    } catch {
+    } catch (err) {
+      logger.error('比較ファイル読み込み失敗', err, { side, fileName: f.name })
       setError('ファイルの読み込みに失敗しました。ファイルが壊れているか、対応していない形式の可能性があります。')
     } finally {
       setLoading(false)
@@ -117,7 +121,8 @@ export function ComparisonPage() {
       const bytes = await exportAnnotatedPdf(file, annotations, handle.pdfProxy, handle.tifFrames)
       const outName = file.name.replace(/\.(pdf|tif|tiff)$/i, '') + '_検図済.pdf'
       triggerDownload(bytes, outName)
-    } catch {
+    } catch (err) {
+      logger.error('比較PDFエクスポート失敗', err, { side, fileName: file.name })
       setError('PDF の出力に失敗しました。もう一度お試しください。')
     } finally {
       setExporting(false)
