@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useLayoutEffect, useState, useRef } from 'react'
 import { Upload } from 'lucide-react'
 import { validateFile } from '@/lib/fileValidator'
 
@@ -20,7 +20,9 @@ export function GlobalDropZone({ onFile, label = 'ファイルをドロップ', 
   const enterCountRef = useRef(0)
   // Stable ref so the effect never needs to re-run when onFile changes
   const onFileRef = useRef(onFile)
-  onFileRef.current = onFile
+  useLayoutEffect(() => {
+    onFileRef.current = onFile
+  })
 
   useEffect(() => {
     if (disabled) return

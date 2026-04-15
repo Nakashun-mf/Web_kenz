@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useAnnotationStore } from '@/store/annotationStore'
 import type {
@@ -99,7 +99,7 @@ export function AnnotationLayer({
 
   const { activeTool, activeProps, annotations, addAnnotation } = useAnnotationStore()
   const annotationKey = `${fileId}:${pageIndex}`
-  const pageAnnotations = annotations[annotationKey] ?? []
+  const pageAnnotations = useMemo(() => annotations[annotationKey] ?? [], [annotations, annotationKey])
 
   useEffect(() => {
     const canvas = canvasRef.current
