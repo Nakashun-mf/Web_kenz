@@ -303,23 +303,19 @@ interface SideBySideProps {
 
 function EmptyPanel({ loading, onFile, label, accent = false }: { loading: boolean; onFile: (f: File) => void; label: string; accent?: boolean }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 bg-slate-50">
+    <div className="flex flex-1 flex-col items-center justify-center bg-slate-50 p-8">
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <>
-          <div className={cn(
-            'flex h-14 w-14 items-center justify-center rounded-2xl',
-            accent ? 'bg-indigo-50' : 'bg-slate-100',
+        <div className="flex w-full max-w-xs flex-col items-center gap-3">
+          <span className={cn(
+            'mb-1 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider',
+            accent ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500',
           )}>
-            <FileText className={cn('h-6 w-6', accent ? 'text-indigo-300' : 'text-slate-300')} />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-slate-500">{label}のファイルを読み込む</p>
-            <p className="mt-1 text-xs text-slate-400">PDF / TIF · 最大 100MB</p>
-          </div>
-          <FileDropzone onFile={onFile} label={`${label}を読み込む`} compact />
-        </>
+            {label}
+          </span>
+          <FileDropzone onFile={onFile} label={`${label}を読み込む`} className="w-full" />
+        </div>
       )}
     </div>
   )
@@ -421,10 +417,16 @@ function OverlayLayout({
 }: OverlayProps) {
   if (!oldFile && !newFile) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-slate-50 gap-8">
-        <EmptyPanel loading={loadingOld} onFile={onOldFile} label="旧版" />
-        <div className="h-32 w-px shrink-0 bg-slate-200" />
-        <EmptyPanel loading={loadingNew} onFile={onNewFile} label="新版" accent />
+      <div className="flex flex-1 items-center justify-center gap-8 bg-slate-50 px-12 py-16">
+        <div className="flex flex-1 flex-col items-center gap-3">
+          <span className="mb-1 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">旧版</span>
+          {loadingOld ? <LoadingSpinner /> : <FileDropzone onFile={onOldFile} label="旧版を読み込む" className="w-full" />}
+        </div>
+        <div className="h-48 w-px shrink-0 bg-slate-200" />
+        <div className="flex flex-1 flex-col items-center gap-3">
+          <span className="mb-1 rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-600">新版</span>
+          {loadingNew ? <LoadingSpinner /> : <FileDropzone onFile={onNewFile} label="新版を読み込む" className="w-full" />}
+        </div>
       </div>
     )
   }
