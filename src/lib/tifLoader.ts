@@ -54,13 +54,15 @@ export async function generateTifThumbnail(
   const canvas = document.createElement('canvas')
   canvas.width = widthPx
   canvas.height = heightPx
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D context is not available')
   ctx.putImageData(imageData, 0, 0)
 
   const thumbCanvas = document.createElement('canvas')
   thumbCanvas.width = Math.round(widthPx * scale)
   thumbCanvas.height = Math.round(heightPx * scale)
-  const thumbCtx = thumbCanvas.getContext('2d')!
+  const thumbCtx = thumbCanvas.getContext('2d')
+  if (!thumbCtx) throw new Error('Canvas 2D context is not available')
   thumbCtx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height)
   return thumbCanvas.toDataURL('image/jpeg', 0.7)
 }
@@ -87,7 +89,8 @@ export function renderTifToCanvas(
   canvas.style.width = `${displayW / dpr}px`
   canvas.style.height = `${displayH / dpr}px`
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D context is not available')
   ctx.save()
 
   ctx.translate(displayW / 2, displayH / 2)
@@ -98,7 +101,9 @@ export function renderTifToCanvas(
   const tmpCanvas = document.createElement('canvas')
   tmpCanvas.width = widthPx
   tmpCanvas.height = heightPx
-  tmpCanvas.getContext('2d')!.putImageData(imageData, 0, 0)
+  const tmpCtx = tmpCanvas.getContext('2d')
+  if (!tmpCtx) throw new Error('Canvas 2D context is not available')
+  tmpCtx.putImageData(imageData, 0, 0)
   ctx.drawImage(tmpCanvas, 0, 0)
   ctx.restore()
 }

@@ -37,7 +37,8 @@ export async function renderPdfPage(
   canvas.style.width = `${viewport.width / dpr}px`
   canvas.style.height = `${viewport.height / dpr}px`
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D context is not available')
   await page.render({ canvasContext: ctx, viewport, canvas }).promise
 }
 
@@ -54,7 +55,8 @@ export async function generatePdfThumbnail(
   const canvas = document.createElement('canvas')
   canvas.width = scaledViewport.width
   canvas.height = scaledViewport.height
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D context is not available')
   await page.render({ canvasContext: ctx, viewport: scaledViewport, canvas }).promise
   return canvas.toDataURL('image/jpeg', 0.7)
 }
@@ -69,7 +71,8 @@ export async function renderPdfPageOffscreen(
   const canvas = document.createElement('canvas')
   canvas.width = viewport.width
   canvas.height = viewport.height
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D context is not available')
   await page.render({ canvasContext: ctx, viewport, canvas }).promise
   return canvas
 }

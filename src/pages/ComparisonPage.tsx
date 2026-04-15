@@ -3,7 +3,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { TifFrame } from '@/lib/tifLoader'
 import { loadPdf, getPdfPageInfo, generatePdfThumbnail } from '@/lib/pdfLoader'
 import { decodeTif } from '@/lib/tifLoader'
-import { validateFile, validateComparisonFiles } from '@/lib/fileValidator'
+import { validateFile, validateComparisonFiles, validateMagicBytes } from '@/lib/fileValidator'
 import { exportAnnotatedPdf, triggerDownload } from '@/lib/exportPdf'
 import { useComparisonStore } from '@/store/comparisonStore'
 import { useAnnotationStore } from '@/store/annotationStore'
@@ -23,18 +23,26 @@ type FileHandle = {
 }
 
 async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy: PDFDocumentProxy | null; tifFrames: TifFrame[] | null }> {
-  const buffer = await f.arrayBuffer()
   const validation = validateFile(f)
-  if (!validation.valid) throw new Error(validation.error)
+  if (!validation.valid) throw new Error('ファイルの形式またはサイズが正しくありません。')
+
+  const buffer = await f.arrayBuffer()
+
+  // マジックバイト検証（拡張子偽装の検出）
+  const magicResult = await validateMagicBytes(buffer, validation.fileType!)
+  if (!magicResult.valid) throw new Error('ファイルの読み込みに失敗しました。')
+
   const fileId = uuidv4()
 
   if (validation.fileType === 'pdf') {
     const pdf = await loadPdf(buffer)
     const pages = await Promise.all(Array.from({ length: pdf.numPages }, (_, i) => getPdfPageInfo(pdf, i)))
     const doc: DocumentFile = { id: fileId, name: f.name, type: 'pdf', arrayBuffer: buffer, pages, totalPages: pdf.numPages }
-    for (let i = 0; i < pdf.numPages; i++) {
-      void generatePdfThumbnail(pdf, i)
-    }
+    // Race condition 修正: void で明示的に非同期実行（結果は updatePageThumbnail で反映）
+    // ComparisonPage では updatePageThumbnail が呼べないため、ここでは生成のみ（将来拡張用）
+    void Promise.all(
+      Array.from({ length: pdf.numPages }, (_, i) => generatePdfThumbnail(pdf, i)),
+    ).catch(() => {})
     return { doc, pdfProxy: pdf, tifFrames: null }
   } else {
     const frames = decodeTif(buffer)
@@ -90,8 +98,8 @@ export function ComparisonPage() {
         const result = validateComparisonFiles(aPagesCount, bPagesCount, aPages, bPages)
         if (!result.valid) setError(result.error ?? 'エラー')
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラー')
+    } catch {
+      setError('ファイルの読み込みに失敗しました。ファイルが壊れているか、対応していない形式の可能性があります。')
     } finally {
       setLoading(false)
     }
@@ -109,8 +117,8 @@ export function ComparisonPage() {
       const bytes = await exportAnnotatedPdf(file, annotations, handle.pdfProxy, handle.tifFrames)
       const outName = file.name.replace(/\.(pdf|tif|tiff)$/i, '') + '_検図済.pdf'
       triggerDownload(bytes, outName)
-    } catch (err) {
-      alert('PDF出力に失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'))
+    } catch {
+      setError('PDF の出力に失敗しました。もう一度お試しください。')
     } finally {
       setExporting(false)
     }

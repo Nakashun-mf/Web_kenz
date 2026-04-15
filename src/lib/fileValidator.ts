@@ -8,6 +8,7 @@ export interface ValidationResult {
   fileType?: FileType
 }
 
+/** ファイルの拡張子・MIMEタイプで形式を確認（同期） */
 export function validateFile(file: File): ValidationResult {
   if (file.size > MAX_FILE_SIZE) {
     return {
@@ -28,6 +29,42 @@ export function validateFile(file: File): ValidationResult {
     valid: false,
     error: 'PDF または TIF ファイルを選択してください。',
   }
+}
+
+/**
+ * ファイルのマジックバイト（シグネチャ）を検証する（非同期）
+ * 拡張子やMIMEタイプの偽装を検出する
+ */
+export async function validateMagicBytes(
+  buffer: ArrayBuffer,
+  expectedType: FileType,
+): Promise<ValidationResult> {
+  const header = new Uint8Array(buffer, 0, 8)
+
+  if (expectedType === 'pdf') {
+    // PDF シグネチャ: %PDF → [0x25, 0x50, 0x44, 0x46]
+    const isPdf =
+      header[0] === 0x25 && header[1] === 0x50 && header[2] === 0x44 && header[3] === 0x46
+    if (!isPdf) {
+      return { valid: false, error: 'ファイルの内容が PDF 形式ではありません。' }
+    }
+    return { valid: true, fileType: 'pdf' }
+  }
+
+  if (expectedType === 'tif') {
+    // TIFF リトルエンディアン: II + 0x2A 0x00 → [0x49, 0x49, 0x2A, 0x00]
+    // TIFF ビッグエンディアン: MM + 0x00 0x2A → [0x4D, 0x4D, 0x00, 0x2A]
+    const isLittleEndian =
+      header[0] === 0x49 && header[1] === 0x49 && header[2] === 0x2a && header[3] === 0x00
+    const isBigEndian =
+      header[0] === 0x4d && header[1] === 0x4d && header[2] === 0x00 && header[3] === 0x2a
+    if (!isLittleEndian && !isBigEndian) {
+      return { valid: false, error: 'ファイルの内容が TIF 形式ではありません。' }
+    }
+    return { valid: true, fileType: 'tif' }
+  }
+
+  return { valid: false, error: '未対応のファイル形式です。' }
 }
 
 export interface ComparisonValidationResult {
