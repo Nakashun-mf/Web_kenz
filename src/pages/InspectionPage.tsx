@@ -167,22 +167,22 @@ export function InspectionPage() {
           )}
 
           {/* 3-step guide */}
-          <div className="flex w-full max-w-2xl items-start gap-0">
+          <div className="flex w-full max-w-xl items-start">
             {([
-              { step: '01', title: 'ファイルを読み込む', desc: 'PDF・TIF をドラッグ&ドロップするか、クリックしてファイルを選択します。' },
-              { step: '02', title: '注釈を追加する',   desc: 'フリーハンド・直線・矩形・テキストなど6種類のツールで図面にマークアップします。' },
-              { step: '03', title: 'PDF に出力する',   desc: '注釈を埋め込んだ PDF をワンクリックでダウンロードできます。' },
+              { step: '01', title: 'ファイルを読み込む', desc: 'PDF・TIF をドロップ、またはクリックして選択します。' },
+              { step: '02', title: '注釈を追加する',     desc: '6種のツールで図面に直接マークアップします。' },
+              { step: '03', title: 'PDF に出力する',     desc: '注釈を埋め込んだ PDF をダウンロードします。' },
             ] as const).map(({ step, title, desc }, i, arr) => (
-              <div key={step} className="flex flex-1 items-start gap-0">
-                <div className="flex flex-col items-center gap-3 px-6 text-center">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-[13px] font-bold text-white shadow-md shadow-indigo-200">
+              <div key={step} className="flex min-w-0 flex-1 items-start">
+                <div className="flex min-w-0 flex-col items-center gap-2.5 px-4 text-center">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[12px] font-bold text-white shadow-md shadow-indigo-200">
                     {step}
                   </div>
-                  <p className="text-[13px] font-semibold text-slate-700">{title}</p>
+                  <p className="text-[13px] font-semibold text-slate-700 leading-snug">{title}</p>
                   <p className="text-[12px] leading-relaxed text-slate-400">{desc}</p>
                 </div>
                 {i < arr.length - 1 && (
-                  <div className="mt-5 h-px w-8 shrink-0 bg-slate-200" />
+                  <div className="mt-4 h-px w-6 shrink-0 bg-slate-200" />
                 )}
               </div>
             ))}
