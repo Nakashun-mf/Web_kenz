@@ -4,7 +4,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { TifFrame } from '@/lib/tifLoader'
 import { loadPdf, getPdfPageInfo, generatePdfThumbnail } from '@/lib/pdfLoader'
 import { decodeTif, generateTifThumbnail } from '@/lib/tifLoader'
-import { validateFile } from '@/lib/fileValidator'
+import { validateFile, validateMagicBytes } from '@/lib/fileValidator'
 import { exportAnnotatedPdf, triggerDownload } from '@/lib/exportPdf'
 import { useDocumentStore } from '@/store/documentStore'
 import { useAnnotationStore } from '@/store/annotationStore'
@@ -32,6 +32,8 @@ export function InspectionPage() {
   const tifFramesRef = useRef<TifFrame[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [exportError, setExportError] = useState<string | null>(null)
+  const [sendSuccess, setSendSuccess] = useState(false)
   const [exporting, setExporting] = useState(false)
 
   const handleFile = async (f: File) => {
@@ -42,6 +44,14 @@ export function InspectionPage() {
     setError(null)
     try {
       const buffer = await f.arrayBuffer()
+
+      // マジックバイト検証（拡張子偽装の検出）
+      const magicResult = await validateMagicBytes(buffer, validation.fileType!)
+      if (!magicResult.valid) {
+        setError(magicResult.error ?? 'ファイルの読み込みに失敗しました')
+        return
+      }
+
       const fileId = uuidv4()
       let docFile: DocumentFile
 
@@ -54,9 +64,12 @@ export function InspectionPage() {
         )
         docFile = { id: fileId, name: f.name, type: 'pdf', arrayBuffer: buffer, pages, totalPages: pdf.numPages }
         setFile(docFile)
-        for (let i = 0; i < pdf.numPages; i++) {
-          generatePdfThumbnail(pdf, i).then((dataUrl) => updatePageThumbnail(i, dataUrl))
-        }
+        // Race condition 修正: サムネイル生成を順次実行（UI ブロックを避けつつ確実に反映）
+        Promise.all(
+          Array.from({ length: pdf.numPages }, (_, i) =>
+            generatePdfThumbnail(pdf, i).then((dataUrl) => updatePageThumbnail(i, dataUrl)),
+          ),
+        ).catch(() => {}) // サムネイル失敗はファイル表示には影響しないため握り潰す
       } else {
         const frames = decodeTif(buffer)
         tifFramesRef.current = frames
@@ -64,12 +77,14 @@ export function InspectionPage() {
         const pages = frames.map((fr) => ({ index: fr.index, widthPt: fr.widthPt, heightPt: fr.heightPt }))
         docFile = { id: fileId, name: f.name, type: 'tif', arrayBuffer: buffer, pages, totalPages: frames.length }
         setFile(docFile)
-        for (let i = 0; i < frames.length; i++) {
-          generateTifThumbnail(buffer, frames, i).then((dataUrl) => updatePageThumbnail(i, dataUrl))
-        }
+        Promise.all(
+          Array.from({ length: frames.length }, (_, i) =>
+            generateTifThumbnail(buffer, frames, i).then((dataUrl) => updatePageThumbnail(i, dataUrl)),
+          ),
+        ).catch(() => {})
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'ファイルの読み込みに失敗しました')
+    } catch {
+      setError('ファイルの読み込みに失敗しました。ファイルが壊れているか、対応していない形式の可能性があります。')
     } finally {
       setLoading(false)
     }
@@ -78,12 +93,13 @@ export function InspectionPage() {
   const handleExport = async () => {
     if (!file) return
     setExporting(true)
+    setExportError(null)
     try {
       const bytes = await exportAnnotatedPdf(file, annotations, pdfProxyRef.current, tifFramesRef.current)
       const outName = file.name.replace(/\.(pdf|tif|tiff)$/i, '') + '_検図済.pdf'
       triggerDownload(bytes, outName)
-    } catch (err) {
-      alert('PDF出力に失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'))
+    } catch {
+      setExportError('PDF の出力に失敗しました。もう一度お試しください。')
     } finally {
       setExporting(false)
     }
@@ -91,7 +107,8 @@ export function InspectionPage() {
 
   const handleSendToComparison = () => {
     if (file) setOldFile(file)
-    alert('比較モードの旧版にセットしました。比較モードタブに切り替えてください。')
+    setSendSuccess(true)
+    setTimeout(() => setSendSuccess(false), 3000)
   }
 
   /* ── Empty state ── */
@@ -151,6 +168,18 @@ export function InspectionPage() {
           <ArrowRight className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      {/* ── Inline notifications ── */}
+      {exportError && (
+        <div className="shrink-0 border-b border-red-100 bg-red-50 px-5 py-2 text-sm font-medium text-red-600">
+          {exportError}
+        </div>
+      )}
+      {sendSuccess && (
+        <div className="shrink-0 border-b border-green-100 bg-green-50 px-5 py-2 text-sm font-medium text-green-700">
+          比較モードの旧版にセットしました。比較モードタブに切り替えてください。
+        </div>
+      )}
 
       {/* ── Body: [vertical toolbar] [thumbnails] [viewer] ── */}
       <div className="flex flex-1 overflow-hidden">

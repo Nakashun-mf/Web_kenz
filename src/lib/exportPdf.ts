@@ -105,12 +105,15 @@ export async function exportAnnotatedPdf(
       pageCanvas = document.createElement('canvas')
       pageCanvas.width = tifFrames[i].widthPx * EXPORT_SCALE
       pageCanvas.height = tifFrames[i].heightPx * EXPORT_SCALE
-      const tCtx = pageCanvas.getContext('2d')!
+      const tCtx = pageCanvas.getContext('2d')
+      if (!tCtx) throw new Error('Canvas 2D context is not available')
       // Scale up for quality
       const tmpC = document.createElement('canvas')
       tmpC.width = tifFrames[i].widthPx
       tmpC.height = tifFrames[i].heightPx
-      tmpC.getContext('2d')!.putImageData(imageData, 0, 0)
+      const tmpCCtx = tmpC.getContext('2d')
+      if (!tmpCCtx) throw new Error('Canvas 2D context is not available')
+      tmpCCtx.putImageData(imageData, 0, 0)
       tCtx.drawImage(tmpC, 0, 0, pageCanvas.width, pageCanvas.height)
     } else {
       continue
@@ -119,13 +122,22 @@ export async function exportAnnotatedPdf(
     // Draw annotations on top
     const scalePt = (pageCanvas.width / page.widthPt)
     if (annotations.length > 0) {
-      const ctx = pageCanvas.getContext('2d')!
+      const ctx = pageCanvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas 2D context is not available')
       drawAnnotationsOnCanvas(ctx, annotations, scalePt)
     }
 
     // Convert canvas to JPEG and embed
-    const jpegDataUrl = pageCanvas.toDataURL('image/jpeg', 0.92)
-    const jpegBytes = await fetch(jpegDataUrl).then(r => r.arrayBuffer())
+    const jpegBytes = await new Promise<ArrayBuffer>((resolve, reject) => {
+      pageCanvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error('Canvas to Blob conversion failed')); return }
+          blob.arrayBuffer().then(resolve, reject)
+        },
+        'image/jpeg',
+        0.92,
+      )
+    })
     const image = await outputDoc.embedJpg(jpegBytes)
 
     const pdfPage = outputDoc.addPage([page.widthPt, page.heightPt])
