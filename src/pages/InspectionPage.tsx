@@ -133,14 +133,26 @@ export function InspectionPage() {
     return (
       <>
         <GlobalDropZone onFile={handleFile} label="図面ファイルをドロップ" />
-        <div className="flex flex-1 flex-col items-center justify-center gap-10 bg-slate-50 px-8">
+        <div className="flex flex-1 flex-col items-center justify-center gap-10 overflow-y-auto bg-slate-50 px-8 py-12">
+
+          {/* Title */}
           <div className="text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-800">検図モード</h2>
-            <p className="mt-3 text-sm text-slate-400">
-              PDF または TIF ファイルを読み込んで検図・注釈を開始します
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+              <span className="text-xs font-semibold text-indigo-600 tracking-wide">検図モード</span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+              図面をすばやく確認・注釈
+            </h2>
+            <p className="mt-2.5 text-sm text-slate-400">
+              PDF または TIF ファイルを読み込んで、検図・注釈・PDF 出力が行えます
             </p>
           </div>
-          <FileDropzone onFile={handleFile} className="w-full max-w-sm" />
+
+          {/* Dropzone */}
+          <FileDropzone onFile={handleFile} className="w-full max-w-md" />
+
+          {/* Loading / Error */}
           {loading && (
             <div className="flex items-center gap-3 rounded-xl bg-indigo-50 px-5 py-3 text-sm font-medium text-indigo-600">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
@@ -148,8 +160,33 @@ export function InspectionPage() {
             </div>
           )}
           {error && (
-            <p className="rounded-xl bg-red-50 px-5 py-3 text-sm font-medium text-red-500">{error}</p>
+            <p className="flex items-center gap-2 rounded-xl bg-red-50 px-5 py-3 text-sm font-medium text-red-600">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+              {error}
+            </p>
           )}
+
+          {/* 3-step guide */}
+          <div className="flex w-full max-w-2xl items-start gap-0">
+            {([
+              { step: '01', title: 'ファイルを読み込む', desc: 'PDF・TIF をドラッグ&ドロップするか、クリックしてファイルを選択します。' },
+              { step: '02', title: '注釈を追加する',   desc: 'フリーハンド・直線・矩形・テキストなど6種類のツールで図面にマークアップします。' },
+              { step: '03', title: 'PDF に出力する',   desc: '注釈を埋め込んだ PDF をワンクリックでダウンロードできます。' },
+            ] as const).map(({ step, title, desc }, i, arr) => (
+              <div key={step} className="flex flex-1 items-start gap-0">
+                <div className="flex flex-col items-center gap-3 px-6 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-[13px] font-bold text-white shadow-md shadow-indigo-200">
+                    {step}
+                  </div>
+                  <p className="text-[13px] font-semibold text-slate-700">{title}</p>
+                  <p className="text-[12px] leading-relaxed text-slate-400">{desc}</p>
+                </div>
+                {i < arr.length - 1 && (
+                  <div className="mt-5 h-px w-8 shrink-0 bg-slate-200" />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </>
     )

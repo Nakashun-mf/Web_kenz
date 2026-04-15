@@ -12,6 +12,19 @@
   --color-primary-700: #4338ca;
   --color-primary-800: #3730a3;
   --color-primary-900: #312e81;
+
+  --animate-fade-in: fade-in 0.18s ease-out both;
+  --animate-slide-up: slide-up 0.22s ease-out both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 :root {
@@ -36,6 +49,12 @@ html, body, #root {
 body {
   background-color: #f8fafc;
   color: #0f172a;
+}
+
+/* Text selection highlight */
+::selection {
+  background-color: #e0e7ff;
+  color: #3730a3;
 }
 
 /* Custom scrollbar */
