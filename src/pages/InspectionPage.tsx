@@ -6,6 +6,7 @@ import { loadPdf, getPdfPageInfo, generatePdfThumbnail } from '@/lib/pdfLoader'
 import { decodeTif, generateTifThumbnail } from '@/lib/tifLoader'
 import { validateFile, validateMagicBytes } from '@/lib/fileValidator'
 import { exportAnnotatedPdf, triggerDownload } from '@/lib/exportPdf'
+import { logger } from '@/lib/logger'
 import { useDocumentStore } from '@/store/documentStore'
 import { useAnnotationStore } from '@/store/annotationStore'
 import { useComparisonStore } from '@/store/comparisonStore'
@@ -15,6 +16,7 @@ import { DocumentViewer } from '@/components/viewer/DocumentViewer'
 import { AnnotationToolbar } from '@/components/toolbar/AnnotationToolbar'
 import { FileDropzone } from '@/components/dropzone/FileDropzone'
 import { GlobalDropZone } from '@/components/dropzone/GlobalDropZone'
+import { InlineNotification } from '@/components/ui/inline-notification'
 import { v4 as uuidv4 } from 'uuid'
 import type { DocumentFile } from '@/types/document'
 
@@ -56,6 +58,8 @@ export function InspectionPage() {
       let docFile: DocumentFile
 
       if (validation.fileType === 'pdf') {
+        // 前のPDFドキュメントを明示的に解放（メモリリーク防止）
+        pdfProxyRef.current?.destroy()
         const pdf = await loadPdf(buffer)
         pdfProxyRef.current = pdf
         tifFramesRef.current = null
@@ -71,9 +75,11 @@ export function InspectionPage() {
           ),
         ).catch(() => {}) // サムネイル失敗はファイル表示には影響しないため握り潰す
       } else {
+        // 前のPDFドキュメントを明示的に解放
+        pdfProxyRef.current?.destroy()
+        pdfProxyRef.current = null
         const frames = decodeTif(buffer)
         tifFramesRef.current = frames
-        pdfProxyRef.current = null
         const pages = frames.map((fr) => ({ index: fr.index, widthPt: fr.widthPt, heightPt: fr.heightPt }))
         docFile = { id: fileId, name: f.name, type: 'tif', arrayBuffer: buffer, pages, totalPages: frames.length }
         setFile(docFile)
@@ -83,7 +89,8 @@ export function InspectionPage() {
           ),
         ).catch(() => {})
       }
-    } catch {
+    } catch (err) {
+      logger.error('ファイル読み込み失敗', err, { fileName: f.name, fileSize: f.size })
       setError('ファイルの読み込みに失敗しました。ファイルが壊れているか、対応していない形式の可能性があります。')
     } finally {
       setLoading(false)
@@ -98,7 +105,8 @@ export function InspectionPage() {
       const bytes = await exportAnnotatedPdf(file, annotations, pdfProxyRef.current, tifFramesRef.current)
       const outName = file.name.replace(/\.(pdf|tif|tiff)$/i, '') + '_検図済.pdf'
       triggerDownload(bytes, outName)
-    } catch {
+    } catch (err) {
+      logger.error('PDFエクスポート失敗', err, { fileName: file.name })
       setExportError('PDF の出力に失敗しました。もう一度お試しください。')
     } finally {
       setExporting(false)
@@ -154,7 +162,7 @@ export function InspectionPage() {
         </span>
         <div className="flex-1" />
         <button
-          onClick={() => { pdfProxyRef.current = null; tifFramesRef.current = null; setFile(null) }}
+          onClick={() => { pdfProxyRef.current?.destroy(); pdfProxyRef.current = null; tifFramesRef.current = null; setFile(null) }}
           className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
         >
           変更
@@ -170,16 +178,11 @@ export function InspectionPage() {
       </div>
 
       {/* ── Inline notifications ── */}
-      {exportError && (
-        <div className="shrink-0 border-b border-red-100 bg-red-50 px-5 py-2 text-sm font-medium text-red-600">
-          {exportError}
-        </div>
-      )}
-      {sendSuccess && (
-        <div className="shrink-0 border-b border-green-100 bg-green-50 px-5 py-2 text-sm font-medium text-green-700">
-          比較モードの旧版にセットしました。比較モードタブに切り替えてください。
-        </div>
-      )}
+      <InlineNotification message={exportError} variant="error" />
+      <InlineNotification
+        message={sendSuccess ? '比較モードの旧版にセットしました。比較モードタブに切り替えてください。' : null}
+        variant="success"
+      />
 
       {/* ── Body: [vertical toolbar] [thumbnails] [viewer] ── */}
       <div className="flex flex-1 overflow-hidden">
