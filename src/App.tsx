@@ -21,7 +21,7 @@ export default function App() {
 
         {/* ══ Header — Meta frosted glass nav ══ */}
         <header
-          className="flex h-14 shrink-0 items-center gap-5 px-6"
+          className="flex h-14 shrink-0 items-center gap-3 px-4"
           style={{
             background: 'rgba(241, 244, 247, 0.88)',
             backdropFilter: 'blur(12px)',
@@ -59,7 +59,7 @@ export default function App() {
 
           {/* Tab switcher — Meta pill style */}
           <nav
-            className="flex items-center gap-1 rounded-full p-1"
+            className="flex shrink-0 items-center gap-1 rounded-full p-1"
             style={{ background: 'rgba(28, 43, 51, 0.07)' }}
           >
             {TABS.map(({ value, icon: Icon, label }) => (
@@ -67,7 +67,7 @@ export default function App() {
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] transition-all duration-150',
+                  'flex shrink-0 items-center gap-1.5 rounded-full whitespace-nowrap px-3 py-1.5 text-[13px] transition-all duration-150',
                   tab === value
                     ? 'text-white shadow-sm'
                     : 'hover:text-[#1C2B33]',
