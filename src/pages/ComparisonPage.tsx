@@ -29,7 +29,6 @@ async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy:
 
   const buffer = await f.arrayBuffer()
 
-  // マジックバイト検証（拡張子偽装の検出）
   const magicResult = await validateMagicBytes(buffer, validation.fileType!)
   if (!magicResult.valid) throw new Error('ファイルの読み込みに失敗しました。')
 
@@ -39,8 +38,6 @@ async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy:
     const pdf = await loadPdf(buffer)
     const pages = await Promise.all(Array.from({ length: pdf.numPages }, (_, i) => getPdfPageInfo(pdf, i)))
     const doc: DocumentFile = { id: fileId, name: f.name, type: 'pdf', arrayBuffer: buffer, pages, totalPages: pdf.numPages }
-    // Race condition 修正: void で明示的に非同期実行（結果は updatePageThumbnail で反映）
-    // ComparisonPage では updatePageThumbnail が呼べないため、ここでは生成のみ（将来拡張用）
     void Promise.all(
       Array.from({ length: pdf.numPages }, (_, i) => generatePdfThumbnail(pdf, i)),
     ).catch(() => {})
@@ -55,8 +52,11 @@ async function loadDocumentFile(f: File): Promise<{ doc: DocumentFile; pdfProxy:
 
 function LoadingSpinner() {
   return (
-    <div className="flex items-center gap-3 text-sm font-medium text-indigo-600">
-      <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+    <div className="flex items-center gap-3 text-sm" style={{ fontWeight: 500, color: '#0064E0' }}>
+      <div
+        className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"
+        style={{ borderColor: '#0064E0', borderTopColor: 'transparent' }}
+      />
       読み込み中...
     </div>
   )
@@ -89,7 +89,6 @@ export function ComparisonPage() {
     setLoading(true)
     setError(null)
     try {
-      // 前のPDFドキュメントを明示的に解放（メモリリーク防止）
       handleRef.current.pdfProxy?.destroy()
       const { doc, pdfProxy, tifFrames } = await loadDocumentFile(f)
       handleRef.current = { pdfProxy, tifFrames }
@@ -145,10 +144,16 @@ export function ComparisonPage() {
       />
 
       {/* ── Comparison toolbar ── */}
-      <div className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-6">
+      <div
+        className="flex h-14 shrink-0 items-center gap-4 px-6"
+        style={{ background: '#ffffff', borderBottom: '1px solid #DEE3E9' }}
+      >
 
         {/* Layout toggle */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
+        <div
+          className="flex items-center gap-1 rounded-full p-1"
+          style={{ background: 'rgba(28,43,51,0.07)' }}
+        >
           {[
             { value: 'sideBySide' as const, icon: Columns2, label: '並列' },
             { value: 'overlay'    as const, icon: Layers,   label: '重ね' },
@@ -156,12 +161,12 @@ export function ComparisonPage() {
             <button
               key={value}
               onClick={() => setLayout(value)}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
-                layout === value
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-600',
-              )}
+              className="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-all"
+              style={{
+                fontWeight: layout === value ? 500 : 400,
+                background: layout === value ? '#0064E0' : 'transparent',
+                color: layout === value ? '#ffffff' : '#5D6C7B',
+              }}
             >
               <Icon className="h-4 w-4" />
               {label}
@@ -172,9 +177,9 @@ export function ComparisonPage() {
         {/* Overlay opacity */}
         {layout === 'overlay' && (
           <>
-            <div className="h-5 w-px bg-slate-200" />
+            <div className="h-5 w-px" style={{ background: '#DEE3E9' }} />
             <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-400">透過率</span>
+              <span className="text-sm" style={{ color: '#5D6C7B' }}>透過率</span>
               <div className="w-32">
                 <Slider
                   value={[overlayOpacity * 100]}
@@ -184,7 +189,7 @@ export function ComparisonPage() {
                   onValueChange={([v]) => setOverlayOpacity(v / 100)}
                 />
               </div>
-              <span className="w-10 text-sm font-semibold text-slate-600">
+              <span className="w-10 text-sm" style={{ fontWeight: 600, color: '#1C2B33' }}>
                 {Math.round(overlayOpacity * 100)}%
               </span>
             </div>
@@ -194,10 +199,13 @@ export function ComparisonPage() {
         {/* Active panel selector */}
         {bothLoaded && (
           <>
-            <div className="h-5 w-px bg-slate-200" />
+            <div className="h-5 w-px" style={{ background: '#DEE3E9' }} />
             <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-400">注釈対象</span>
-              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5">
+              <span className="text-sm" style={{ color: '#5D6C7B' }}>注釈対象</span>
+              <div
+                className="flex items-center gap-1 rounded-full p-1"
+                style={{ background: 'rgba(28,43,51,0.07)' }}
+              >
                 {[
                   { value: 'old' as const, label: '旧版' },
                   { value: 'new' as const, label: '新版' },
@@ -205,12 +213,12 @@ export function ComparisonPage() {
                   <button
                     key={value}
                     onClick={() => setActivePanel(value)}
-                    className={cn(
-                      'rounded-lg px-4 py-2 text-sm font-semibold transition-all',
-                      activePanel === value
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-slate-600',
-                    )}
+                    className="rounded-full px-4 py-1.5 text-sm transition-all"
+                    style={{
+                      fontWeight: activePanel === value ? 500 : 400,
+                      background: activePanel === value ? '#0064E0' : 'transparent',
+                      color: activePanel === value ? '#ffffff' : '#5D6C7B',
+                    }}
                   >
                     {label}
                   </button>
@@ -223,7 +231,13 @@ export function ComparisonPage() {
         <div className="flex-1" />
 
         {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-500 max-w-xs truncate" title={error}>{error}</p>
+          <p
+            className="rounded-full px-4 py-1.5 text-sm max-w-xs truncate"
+            style={{ fontWeight: 500, background: '#FFF0F0', color: '#C80A28' }}
+            title={error}
+          >
+            {error}
+          </p>
         )}
       </div>
 
@@ -303,20 +317,28 @@ interface SideBySideProps {
 
 function EmptyPanel({ loading, onFile, label, accent = false }: { loading: boolean; onFile: (f: File) => void; label: string; accent?: boolean }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-slate-50 px-6 py-10">
+    <div
+      className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-10"
+      style={{ background: '#F1F4F7' }}
+    >
       {loading ? (
         <LoadingSpinner />
       ) : (
         <>
-          <div className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-xl',
-            accent ? 'bg-indigo-50' : 'bg-slate-100',
-          )}>
-            <FileText className={cn('h-5 w-5', accent ? 'text-indigo-400' : 'text-slate-300')} />
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-2xl"
+            style={{ background: accent ? '#E8F3FF' : '#ffffff' }}
+          >
+            <FileText
+              className="h-5 w-5"
+              style={{ color: accent ? '#0064E0' : '#5D6C7B' }}
+            />
           </div>
           <div className="text-center">
-            <p className="text-sm font-semibold text-slate-500">{label}を読み込む</p>
-            <p className="mt-1 text-xs text-slate-400">PDF / TIF</p>
+            <p className="text-sm" style={{ fontWeight: 600, color: '#1C2B33' }}>
+              {label}を読み込む
+            </p>
+            <p className="mt-1 text-xs" style={{ color: '#5D6C7B' }}>PDF / TIF</p>
           </div>
           <FileDropzone onFile={onFile} label={`${label}を選択`} compact />
         </>
@@ -327,22 +349,27 @@ function EmptyPanel({ loading, onFile, label, accent = false }: { loading: boole
 
 function PanelHeader({ label, filename, accent }: { label: string; filename?: string; accent?: boolean }) {
   return (
-    <div className="flex h-12 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-5">
-      <span className={cn(
-        'shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider',
-        accent
-          ? 'bg-indigo-100 text-indigo-600'
-          : 'bg-slate-100 text-slate-500',
-      )}>
+    <div
+      className="flex h-12 shrink-0 items-center gap-3 px-5"
+      style={{ background: '#ffffff', borderBottom: '1px solid #DEE3E9' }}
+    >
+      <span
+        className="shrink-0 rounded-full px-3 py-1 text-[11px] uppercase tracking-wider"
+        style={{
+          fontWeight: 700,
+          background: accent ? '#E8F3FF' : '#F1F4F7',
+          color: accent ? '#0064E0' : '#5D6C7B',
+        }}
+      >
         {label}
       </span>
       {filename ? (
         <>
-          <FileText className="h-3.5 w-3.5 shrink-0 text-slate-300" />
-          <span className="truncate text-sm text-slate-500" title={filename}>{filename}</span>
+          <FileText className="h-3.5 w-3.5 shrink-0" style={{ color: '#DEE3E9' }} />
+          <span className="truncate text-sm" style={{ color: '#5D6C7B' }} title={filename}>{filename}</span>
         </>
       ) : (
-        <span className="text-sm text-slate-300">ファイル未読み込み</span>
+        <span className="text-sm" style={{ color: '#DEE3E9' }}>ファイル未読み込み</span>
       )}
     </div>
   )
@@ -354,7 +381,7 @@ function SideBySideLayout({
 }: SideBySideProps) {
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="flex flex-1 flex-col border-r border-slate-200">
+      <div className="flex flex-1 flex-col" style={{ borderRight: '1px solid #DEE3E9' }}>
         <PanelHeader label="旧版" filename={oldFile?.name} />
         {oldFile ? (
           <DocumentViewer
@@ -421,9 +448,12 @@ function OverlayLayout({
 }: OverlayProps) {
   if (!oldFile && !newFile) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-6 bg-slate-50 px-8">
+      <div
+        className="flex flex-1 items-center justify-center gap-6 px-8"
+        style={{ background: '#F1F4F7' }}
+      >
         <EmptyPanel loading={loadingOld} onFile={onOldFile} label="旧版" />
-        <div className="h-32 w-px shrink-0 bg-slate-200" />
+        <div className="h-32 w-px shrink-0" style={{ background: '#DEE3E9' }} />
         <EmptyPanel loading={loadingNew} onFile={onNewFile} label="新版" accent />
       </div>
     )
@@ -473,12 +503,26 @@ function OverlayLayout({
         <div className="absolute bottom-6 right-6 flex gap-3">
           {!oldFile && (
             loadingOld
-              ? <span className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm">読込中...</span>
+              ? (
+                <span
+                  className="rounded-full px-4 py-2 text-sm shadow-sm"
+                  style={{ fontWeight: 500, background: 'rgba(255,255,255,0.95)', color: '#0064E0' }}
+                >
+                  読込中...
+                </span>
+              )
               : <FileDropzone onFile={onOldFile} label="旧版" compact className="!w-auto" />
           )}
           {!newFile && (
             loadingNew
-              ? <span className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm">読込中...</span>
+              ? (
+                <span
+                  className="rounded-full px-4 py-2 text-sm shadow-sm"
+                  style={{ fontWeight: 500, background: 'rgba(255,255,255,0.95)', color: '#0064E0' }}
+                >
+                  読込中...
+                </span>
+              )
               : <FileDropzone onFile={onNewFile} label="新版" compact className="!w-auto" />
           )}
         </div>

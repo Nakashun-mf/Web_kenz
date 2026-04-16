@@ -17,37 +17,66 @@ export default function App() {
 
   return (
     <TooltipProvider delayDuration={400}>
-      <div className="flex h-screen flex-col bg-slate-50">
+      <div className="flex h-screen flex-col" style={{ background: '#F1F4F7' }}>
 
-        {/* ══ Header ══ */}
-        <header className="flex h-14 shrink-0 items-center gap-5 border-b border-slate-200 bg-white px-6 shadow-sm">
-
+        {/* ══ Header — Meta frosted glass nav ══ */}
+        <header
+          className="flex h-14 shrink-0 items-center gap-5 px-6"
+          style={{
+            background: 'rgba(241, 244, 247, 0.88)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          }}
+        >
           {/* Logo mark */}
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: '#0064E0', boxShadow: '0 2px 8px rgba(0,100,224,0.35)' }}
+            >
               <FileSearch className="h-4 w-4 text-white" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-[13px] font-bold tracking-tight text-slate-900">図面検図</span>
-              <span className="mt-0.5 text-[10px] font-medium text-slate-400">Drawing Inspection</span>
+              <span
+                className="text-[13px] tracking-tight"
+                style={{ fontWeight: 700, color: '#1C2B33' }}
+              >
+                図面検図
+              </span>
+              <span
+                className="mt-0.5 text-[10px]"
+                style={{ fontWeight: 500, color: '#5D6C7B' }}
+              >
+                Drawing Inspection
+              </span>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="h-5 w-px bg-slate-200" />
+          <div className="h-5 w-px" style={{ background: '#DEE3E9' }} />
 
-          {/* Tab switcher — pill style */}
-          <nav className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
+          {/* Tab switcher — Meta pill style */}
+          <nav
+            className="flex items-center gap-1 rounded-full p-1"
+            style={{ background: 'rgba(28, 43, 51, 0.07)' }}
+          >
             {TABS.map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-md px-4 py-1.5 text-[13px] font-medium transition-all duration-150',
+                  'flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] transition-all duration-150',
                   tab === value
-                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/80'
-                    : 'text-slate-500 hover:text-slate-700',
+                    ? 'text-white shadow-sm'
+                    : 'hover:text-[#1C2B33]',
                 )}
+                style={{
+                  fontWeight: tab === value ? 500 : 400,
+                  background: tab === value ? '#0064E0' : 'transparent',
+                  color: tab === value ? '#ffffff' : '#5D6C7B',
+                }}
               >
                 <Icon className="h-3.5 w-3.5" />
                 {label}
@@ -58,7 +87,10 @@ export default function App() {
           <div className="flex-1" />
 
           {/* Version badge */}
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-400">
+          <span
+            className="rounded-full px-2.5 py-1 text-[11px]"
+            style={{ fontWeight: 600, background: '#DEE3E9', color: '#5D6C7B' }}
+          >
             v1.0
           </span>
         </header>

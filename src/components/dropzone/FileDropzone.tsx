@@ -46,16 +46,33 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
           onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          className={cn(
-            'flex items-center gap-2.5 rounded-xl border-2 border-dashed px-5 py-3 text-sm font-medium text-slate-500 transition-all',
-            'hover:border-indigo-400 hover:bg-indigo-50/50 hover:text-indigo-600',
-            dragging && 'border-indigo-500 bg-indigo-50 text-indigo-600 scale-[1.02]',
-          )}
+          className="flex items-center gap-2.5 rounded-full border-2 border-dashed px-5 py-2.5 text-sm transition-all"
+          style={{
+            fontWeight: 500,
+            borderColor: dragging ? '#0064E0' : '#DEE3E9',
+            background: dragging ? '#E8F3FF' : 'transparent',
+            color: dragging ? '#0064E0' : '#5D6C7B',
+            transform: dragging ? 'scale(1.02)' : 'scale(1)',
+          }}
+          onMouseEnter={e => {
+            if (!dragging) {
+              (e.currentTarget as HTMLElement).style.borderColor = '#0064E0'
+              ;(e.currentTarget as HTMLElement).style.background = '#E8F3FF'
+              ;(e.currentTarget as HTMLElement).style.color = '#0064E0'
+            }
+          }}
+          onMouseLeave={e => {
+            if (!dragging) {
+              (e.currentTarget as HTMLElement).style.borderColor = '#DEE3E9'
+              ;(e.currentTarget as HTMLElement).style.background = 'transparent'
+              ;(e.currentTarget as HTMLElement).style.color = '#5D6C7B'
+            }
+          }}
         >
           <Upload className="h-4 w-4 shrink-0" />
           <span>{label}</span>
         </button>
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-xs" style={{ color: '#C80A28' }}>{error}</p>}
         <input ref={inputRef} type="file" accept=".pdf,.tif,.tiff" className="hidden" onChange={handleChange} />
       </div>
     )
@@ -68,54 +85,70 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
         onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        className={cn(
-          'group relative flex w-full flex-col items-center gap-5 overflow-hidden rounded-2xl border-2 border-dashed px-5 py-10 text-center transition-all duration-200',
-          dragging
-            ? 'border-indigo-400 bg-indigo-50/60 shadow-lg shadow-indigo-100'
-            : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/20 hover:shadow-md',
-        )}
+        className="group relative flex w-full flex-col items-center gap-5 overflow-hidden rounded-[20px] border-2 border-dashed px-5 py-10 text-center transition-all duration-200"
+        style={{
+          borderColor: dragging ? '#0064E0' : '#DEE3E9',
+          background: dragging ? '#E8F3FF' : '#ffffff',
+          boxShadow: dragging ? '0 12px 28px 0 rgba(0,100,224,0.15), 0 2px 4px 0 rgba(0,100,224,0.08)' : '0 2px 4px 0 rgba(0,0,0,0.06)',
+        }}
+        onMouseEnter={e => {
+          if (!dragging) {
+            (e.currentTarget as HTMLElement).style.borderColor = '#47A5FA'
+            ;(e.currentTarget as HTMLElement).style.background = '#F7FBFF'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 28px 0 rgba(0,0,0,0.1), 0 2px 4px 0 rgba(0,0,0,0.06)'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!dragging) {
+            (e.currentTarget as HTMLElement).style.borderColor = '#DEE3E9'
+            ;(e.currentTarget as HTMLElement).style.background = '#ffffff'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 4px 0 rgba(0,0,0,0.06)'
+          }
+        }}
       >
-        {/* Subtle background pattern on hover */}
-        <div className={cn(
-          'absolute inset-0 transition-opacity duration-200',
-          dragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-        )}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.04)_0%,transparent_70%)]" />
-        </div>
-
         {/* Icon */}
-        <div className={cn(
-          'relative flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-200',
-          dragging
-            ? 'bg-indigo-100 scale-110'
-            : 'bg-gradient-to-br from-slate-50 to-slate-100 shadow-sm group-hover:from-indigo-50 group-hover:to-indigo-100',
-        )}>
+        <div
+          className="relative flex h-16 w-16 items-center justify-center rounded-[20px] transition-all duration-200"
+          style={{
+            background: dragging ? '#E8F3FF' : '#F1F4F7',
+            transform: dragging ? 'scale(1.1)' : 'scale(1)',
+          }}
+        >
           {dragging ? (
-            <Upload className="h-7 w-7 text-indigo-600" />
+            <Upload className="h-7 w-7" style={{ color: '#0064E0' }} />
           ) : (
-            <FileText className="h-7 w-7 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+            <FileText className="h-7 w-7 transition-colors" style={{ color: '#5D6C7B' }} />
           )}
         </div>
 
         {/* Text */}
         <div className="relative">
-          <p className="text-[15px] font-semibold text-slate-700">
+          <p className="text-[15px]" style={{ fontWeight: 500, color: '#1C2B33' }}>
             {dragging ? 'ここにドロップ' : label}
           </p>
-          <p className="mt-1.5 text-sm text-slate-400">
+          <p className="mt-1.5 text-sm" style={{ color: '#5D6C7B' }}>
             ドラッグ&ドロップ または クリックして選択
           </p>
           {/* Format badges */}
           <div className="mt-4 flex items-center justify-center gap-2">
-            <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-500">
+            <span
+              className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px]"
+              style={{ fontWeight: 600, background: '#F1F4F7', color: '#5D6C7B' }}
+            >
               <FileText className="h-3 w-3" />
               PDF
             </span>
-            <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-500">
+            <span
+              className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px]"
+              style={{ fontWeight: 600, background: '#F1F4F7', color: '#5D6C7B' }}
+            >
               <FileImage className="h-3 w-3" />
               TIF / TIFF
             </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-400">
+            <span
+              className="rounded-full px-3 py-1 text-[11px]"
+              style={{ fontWeight: 600, background: '#F1F4F7', color: '#5D6C7B' }}
+            >
               最大 100MB
             </span>
           </div>
@@ -123,8 +156,11 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
       </button>
 
       {error && (
-        <p className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600">
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+        <p
+          className="flex items-center gap-2 rounded-full px-4 py-2.5 text-sm"
+          style={{ fontWeight: 500, background: '#FFF0F0', color: '#C80A28' }}
+        >
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#C80A28' }} />
           {error}
         </p>
       )}
