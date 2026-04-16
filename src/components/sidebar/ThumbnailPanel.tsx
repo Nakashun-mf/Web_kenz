@@ -111,7 +111,7 @@ export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPa
           ページ
         </p>
         <span
-          className="rounded-full px-3 py-1.5 text-xs"
+          className="rounded-full px-2 py-0.5 text-xs"
           style={{ fontWeight: 700, background: '#DEE3E9', color: '#5D6C7B' }}
         >
           {pages.length}

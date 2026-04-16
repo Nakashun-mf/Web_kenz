@@ -208,7 +208,7 @@ function VerticalToolbar({
               <span className="text-sm" style={{ color: '#5D6C7B' }}>枠線</span>
               <button
                 onClick={() => setActiveProps({ showBorder: !activeProps.showBorder })}
-                className="rounded-full px-5 py-2 text-sm transition-colors"
+                className="rounded-full px-3 py-1.5 text-sm transition-colors"
                 style={{
                   fontWeight: 600,
                   background: activeProps.showBorder ? '#E8F3FF' : '#F1F4F7',
@@ -291,7 +291,7 @@ function HorizontalToolbar({
       {/* Text props inline */}
       {activeTool === 'text' && (
         <div
-          className="flex items-center gap-3 rounded-2xl px-5 py-2"
+          className="flex items-center gap-3 rounded-2xl px-4 py-1.5"
           style={{ border: '1px solid #DEE3E9', background: '#F7F8FA' }}
         >
           <span className="text-sm" style={{ color: '#5D6C7B' }}>サイズ</span>
@@ -376,7 +376,7 @@ function HorizontalToolbar({
         <button
           onClick={onExport}
           disabled={exportLoading}
-          className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm text-white transition-all disabled:opacity-60"
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm text-white transition-all disabled:opacity-60"
           style={{ fontWeight: 500, background: '#0064E0', boxShadow: '0 2px 8px rgba(0,100,224,0.3)' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#0143B5' }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#0064E0' }}

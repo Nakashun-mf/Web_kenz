@@ -46,7 +46,7 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
           onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          className="flex items-center gap-2.5 rounded-full border-2 border-dashed px-6 py-3 text-sm transition-all"
+          className="flex items-center gap-2.5 rounded-full border-2 border-dashed px-4 py-2 text-sm transition-all"
           style={{
             fontWeight: 500,
             borderColor: dragging ? '#0064E0' : '#DEE3E9',
@@ -132,21 +132,21 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
           {/* Format badges */}
           <div className="mt-4 flex items-center justify-center gap-2">
             <span
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px]"
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px]"
               style={{ fontWeight: 600, background: '#F1F4F7', color: '#5D6C7B' }}
             >
               <FileText className="h-3 w-3" />
               PDF
             </span>
             <span
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px]"
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px]"
               style={{ fontWeight: 600, background: '#F1F4F7', color: '#5D6C7B' }}
             >
               <FileImage className="h-3 w-3" />
               TIF / TIFF
             </span>
             <span
-              className="rounded-full px-3 py-1.5 text-[11px]"
+              className="rounded-full px-2.5 py-1 text-[11px]"
               style={{ fontWeight: 600, background: '#F1F4F7', color: '#5D6C7B' }}
             >
               最大 100MB
@@ -157,7 +157,7 @@ export function FileDropzone({ onFile, label = 'ファイルを読み込む', cl
 
       {error && (
         <p
-          className="flex items-center gap-2 rounded-full px-4 py-2.5 text-sm"
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm"
           style={{ fontWeight: 500, background: '#FFF0F0', color: '#C80A28' }}
         >
           <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#C80A28' }} />

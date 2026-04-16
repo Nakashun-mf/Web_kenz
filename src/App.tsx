@@ -67,7 +67,7 @@ export default function App() {
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-full px-5 py-2 text-[13px] transition-all duration-150',
+                  'flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] transition-all duration-150',
                   tab === value
                     ? 'text-white shadow-sm'
                     : 'hover:text-[#1C2B33]',
@@ -88,7 +88,7 @@ export default function App() {
 
           {/* Version badge */}
           <span
-            className="rounded-full px-3 py-1.5 text-[11px]"
+            className="rounded-full px-2.5 py-0.5 text-[11px]"
             style={{ fontWeight: 600, background: '#DEE3E9', color: '#5D6C7B' }}
           >
             v1.0
