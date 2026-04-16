@@ -353,7 +353,7 @@ function PanelHeader({ label, filename, accent }: { label: string; filename?: st
       style={{ background: '#ffffff', borderBottom: '1px solid #DEE3E9' }}
     >
       <span
-        className="shrink-0 rounded-full px-4 py-1.5 text-[11px] uppercase tracking-wider"
+        className="shrink-0 rounded-full px-4 py-2 text-[11px] uppercase tracking-wider"
         style={{
           fontWeight: 700,
           background: accent ? '#E8F3FF' : '#F1F4F7',

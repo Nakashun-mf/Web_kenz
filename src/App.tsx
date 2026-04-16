@@ -88,7 +88,7 @@ export default function App() {
 
           {/* Version badge */}
           <span
-            className="rounded-full px-2.5 py-1 text-[11px]"
+            className="rounded-full px-3 py-1.5 text-[11px]"
             style={{ fontWeight: 600, background: '#DEE3E9', color: '#5D6C7B' }}
           >
             v1.0
