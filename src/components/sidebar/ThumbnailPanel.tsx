@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { FixedSizeList, type ListChildComponentProps } from 'react-window'
 import { AutoSizer } from 'react-virtualized-auto-sizer'
-import { cn } from '@/lib/utils'
 import type { PageInfo } from '@/types/document'
 
 interface ThumbnailPanelProps {

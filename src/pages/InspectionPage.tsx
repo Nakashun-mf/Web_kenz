@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-import { ArrowRight, FileText, Upload } from 'lucide-react'
+import { ArrowRight, FileText } from 'lucide-react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { TifFrame } from '@/lib/tifLoader'
 import { loadPdf, getPdfPageInfo, generatePdfThumbnail } from '@/lib/pdfLoader'
