@@ -10,7 +10,7 @@ interface ThumbnailPanelProps {
   onPageSelect: (index: number) => void
 }
 
-const ITEM_HEIGHT = 148 // px per thumbnail row
+const ITEM_HEIGHT = 148
 
 interface ItemData {
   pages: PageInfo[]
@@ -24,19 +24,38 @@ function ThumbnailItem({ index, style, data }: ListChildComponentProps<ItemData>
   const isActive = index === currentPage
 
   return (
-    <div style={style} className="px-4 py-1.5">
+    <div style={style} className="px-3 py-1.5">
       <button
         onClick={() => onPageSelect(index)}
-        className={cn(
-          'group w-full rounded-xl p-2.5 text-left transition-all',
-          isActive
-            ? 'bg-white shadow-sm ring-2 ring-indigo-500/70'
-            : 'hover:bg-white hover:shadow-sm ring-2 ring-transparent hover:ring-slate-200/80',
-        )}
+        className="group w-full rounded-[20px] p-2.5 text-left transition-all"
+        style={{
+          background: isActive ? '#ffffff' : 'transparent',
+          boxShadow: isActive ? '0 2px 4px 0 rgba(0,0,0,0.1)' : 'none',
+          outline: isActive ? '2px solid #0064E0' : '2px solid transparent',
+          outlineOffset: '-2px',
+        }}
+        onMouseEnter={e => {
+          if (!isActive) {
+            (e.currentTarget as HTMLElement).style.background = '#ffffff'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 4px 0 rgba(0,0,0,0.08)'
+            ;(e.currentTarget as HTMLElement).style.outline = '2px solid #DEE3E9'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isActive) {
+            (e.currentTarget as HTMLElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
+            ;(e.currentTarget as HTMLElement).style.outline = '2px solid transparent'
+          }
+        }}
       >
         <div
-          className="relative mx-auto overflow-hidden rounded-lg bg-white shadow-sm border border-slate-100"
-          style={{ aspectRatio: `${page.widthPt} / ${page.heightPt}`, maxWidth: 108 }}
+          className="relative mx-auto overflow-hidden rounded-lg bg-white"
+          style={{
+            aspectRatio: `${page.widthPt} / ${page.heightPt}`,
+            maxWidth: 108,
+            border: '1px solid #DEE3E9',
+          }}
         >
           {page.thumbnailDataUrl ? (
             <img
@@ -45,15 +64,21 @@ function ThumbnailItem({ index, style, data }: ListChildComponentProps<ItemData>
               className="h-full w-full object-contain"
             />
           ) : (
-            <div className="flex h-full min-h-[80px] items-center justify-center bg-slate-50">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+            <div className="flex h-full min-h-[80px] items-center justify-center" style={{ background: '#F1F4F7' }}>
+              <div
+                className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"
+                style={{ borderColor: '#0064E0', borderTopColor: 'transparent' }}
+              />
             </div>
           )}
         </div>
-        <p className={cn(
-          'mt-2 text-center text-[11px] font-semibold',
-          isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500',
-        )}>
+        <p
+          className="mt-2 text-center text-[11px]"
+          style={{
+            fontWeight: 600,
+            color: isActive ? '#0064E0' : '#5D6C7B',
+          }}
+        >
           {index + 1}
         </p>
       </button>
@@ -64,7 +89,6 @@ function ThumbnailItem({ index, style, data }: ListChildComponentProps<ItemData>
 export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPanelProps) {
   const listRef = useRef<FixedSizeList>(null)
 
-  // アクティブなサムネイルを表示領域内にスクロール
   useEffect(() => {
     listRef.current?.scrollToItem(currentPage, 'smart')
   }, [currentPage])
@@ -72,16 +96,30 @@ export function ThumbnailPanel({ pages, currentPage, onPageSelect }: ThumbnailPa
   const itemData: ItemData = { pages, currentPage, onPageSelect }
 
   return (
-    <div className="flex h-full flex-col border-r border-slate-200 bg-zinc-50">
+    <div
+      className="flex h-full flex-col"
+      style={{ background: '#F7F8FA', borderRight: '1px solid #DEE3E9' }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 shrink-0">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">ページ</p>
-        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500">
+      <div
+        className="flex items-center justify-between px-4 py-3 shrink-0"
+        style={{ borderBottom: '1px solid #DEE3E9' }}
+      >
+        <p
+          className="text-xs uppercase tracking-widest"
+          style={{ fontWeight: 600, color: '#5D6C7B' }}
+        >
+          ページ
+        </p>
+        <span
+          className="rounded-full px-2 py-0.5 text-xs"
+          style={{ fontWeight: 700, background: '#DEE3E9', color: '#5D6C7B' }}
+        >
           {pages.length}
         </span>
       </div>
 
-      {/* Virtualized thumbnail list — 1000ページでも DOM 要素は画面内の数個のみ */}
+      {/* Virtualized thumbnail list */}
       <div className="flex-1 overflow-hidden">
         <AutoSizer renderProp={({ height, width }) => (
           <FixedSizeList

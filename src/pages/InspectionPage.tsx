@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-import { ArrowRight, FileText } from 'lucide-react'
+import { ArrowRight, FileText, Upload } from 'lucide-react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { TifFrame } from '@/lib/tifLoader'
 import { loadPdf, getPdfPageInfo, generatePdfThumbnail } from '@/lib/pdfLoader'
@@ -39,7 +39,6 @@ export function InspectionPage() {
   const [exporting, setExporting] = useState(false)
   const sendSuccessTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // アンマウント時にタイマーをクリア（メモリリーク防止）
   useEffect(() => {
     return () => {
       if (sendSuccessTimerRef.current) clearTimeout(sendSuccessTimerRef.current)
@@ -55,7 +54,6 @@ export function InspectionPage() {
     try {
       const buffer = await f.arrayBuffer()
 
-      // マジックバイト検証（拡張子偽装の検出）
       const magicResult = await validateMagicBytes(buffer, validation.fileType!)
       if (!magicResult.valid) {
         setError(magicResult.error ?? 'ファイルの読み込みに失敗しました')
@@ -66,7 +64,6 @@ export function InspectionPage() {
       let docFile: DocumentFile
 
       if (validation.fileType === 'pdf') {
-        // 前のPDFドキュメントを明示的に解放（メモリリーク防止）
         pdfProxyRef.current?.destroy()
         const pdf = await loadPdf(buffer)
         pdfProxyRef.current = pdf
@@ -76,14 +73,12 @@ export function InspectionPage() {
         )
         docFile = { id: fileId, name: f.name, type: 'pdf', arrayBuffer: buffer, pages, totalPages: pdf.numPages }
         setFile(docFile)
-        // Race condition 修正: サムネイル生成を順次実行（UI ブロックを避けつつ確実に反映）
         Promise.all(
           Array.from({ length: pdf.numPages }, (_, i) =>
             generatePdfThumbnail(pdf, i).then((dataUrl) => updatePageThumbnail(i, dataUrl)),
           ),
-        ).catch(() => {}) // サムネイル失敗はファイル表示には影響しないため握り潰す
+        ).catch(() => {})
       } else {
-        // 前のPDFドキュメントを明示的に解放
         pdfProxyRef.current?.destroy()
         pdfProxyRef.current = null
         const frames = decodeTif(buffer)
@@ -133,18 +128,35 @@ export function InspectionPage() {
     return (
       <>
         <GlobalDropZone onFile={handleFile} label="図面ファイルをドロップ" />
-        <div className="flex flex-1 flex-col items-center justify-center gap-10 overflow-y-auto bg-slate-50 px-8 py-12">
+        <div
+          className="flex flex-1 flex-col items-center justify-center gap-10 overflow-y-auto px-8 py-12"
+          style={{ background: '#F1F4F7' }}
+        >
 
           {/* Title */}
           <div className="text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-              <span className="text-xs font-semibold text-indigo-600 tracking-wide">検図モード</span>
+            <div
+              className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5"
+              style={{ background: '#E8F3FF' }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#0064E0' }} />
+              <span
+                className="text-xs tracking-wide"
+                style={{ fontWeight: 600, color: '#0064E0' }}
+              >
+                検図モード
+              </span>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h2
+              className="text-2xl tracking-tight"
+              style={{ fontWeight: 500, color: '#1C2B33' }}
+            >
               図面をすばやく確認・注釈
             </h2>
-            <p className="mt-2.5 text-sm text-slate-400">
+            <p
+              className="mt-2.5 text-sm"
+              style={{ color: '#5D6C7B' }}
+            >
               PDF または TIF ファイルを読み込んで、検図・注釈・PDF 出力が行えます
             </p>
           </div>
@@ -154,14 +166,23 @@ export function InspectionPage() {
 
           {/* Loading / Error */}
           {loading && (
-            <div className="flex items-center gap-3 rounded-xl bg-indigo-50 px-5 py-3 text-sm font-medium text-indigo-600">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            <div
+              className="flex items-center gap-3 rounded-full px-5 py-3 text-sm"
+              style={{ fontWeight: 500, background: '#E8F3FF', color: '#0064E0' }}
+            >
+              <div
+                className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"
+                style={{ borderColor: '#0064E0', borderTopColor: 'transparent' }}
+              />
               読み込み中…
             </div>
           )}
           {error && (
-            <p className="flex items-center gap-2 rounded-xl bg-red-50 px-5 py-3 text-sm font-medium text-red-600">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+            <p
+              className="flex items-center gap-2 rounded-full px-5 py-3 text-sm"
+              style={{ fontWeight: 500, background: '#FFF0F0', color: '#C80A28' }}
+            >
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#C80A28' }} />
               {error}
             </p>
           )}
@@ -175,14 +196,27 @@ export function InspectionPage() {
             ] as const).map(({ step, title, desc }, i, arr) => (
               <div key={step} className="flex min-w-0 flex-1 items-start">
                 <div className="flex min-w-0 flex-col items-center gap-2.5 px-4 text-center">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[12px] font-bold text-white shadow-md shadow-indigo-200">
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[12px] text-white"
+                    style={{ fontWeight: 700, background: '#0064E0', boxShadow: '0 4px 12px rgba(0,100,224,0.3)' }}
+                  >
                     {step}
                   </div>
-                  <p className="text-[13px] font-semibold text-slate-700 leading-snug">{title}</p>
-                  <p className="text-[12px] leading-relaxed text-slate-400">{desc}</p>
+                  <p
+                    className="text-[13px] leading-snug"
+                    style={{ fontWeight: 600, color: '#1C2B33' }}
+                  >
+                    {title}
+                  </p>
+                  <p
+                    className="text-[12px] leading-relaxed"
+                    style={{ color: '#5D6C7B' }}
+                  >
+                    {desc}
+                  </p>
                 </div>
                 {i < arr.length - 1 && (
-                  <div className="mt-4 h-px w-6 shrink-0 bg-slate-200" />
+                  <div className="mt-4 h-px w-6 shrink-0" style={{ background: '#DEE3E9' }} />
                 )}
               </div>
             ))}
@@ -198,10 +232,17 @@ export function InspectionPage() {
     <div className="flex h-full flex-col">
 
       {/* ── File info bar ── */}
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-5">
-        <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+      <div
+        className="flex h-12 shrink-0 items-center gap-3 px-5"
+        style={{
+          background: '#ffffff',
+          borderBottom: '1px solid #DEE3E9',
+        }}
+      >
+        <FileText className="h-4 w-4 shrink-0" style={{ color: '#5D6C7B' }} />
         <span
-          className="truncate text-sm font-semibold text-slate-700 max-w-[300px]"
+          className="truncate text-sm max-w-[300px]"
+          style={{ fontWeight: 600, color: '#1C2B33' }}
           title={file.name}
         >
           {file.name}
@@ -209,14 +250,20 @@ export function InspectionPage() {
         <div className="flex-1" />
         <button
           onClick={() => { pdfProxyRef.current?.destroy(); pdfProxyRef.current = null; tifFramesRef.current = null; setFile(null) }}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          className="rounded-full px-4 py-1.5 text-sm transition-colors"
+          style={{ fontWeight: 500, color: '#5D6C7B' }}
+          onMouseEnter={e => { (e.target as HTMLElement).style.background = '#F1F4F7'; (e.target as HTMLElement).style.color = '#1C2B33' }}
+          onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = '#5D6C7B' }}
         >
           変更
         </button>
-        <div className="h-4 w-px bg-slate-200" />
+        <div className="h-4 w-px" style={{ background: '#DEE3E9' }} />
         <button
           onClick={handleSendToComparison}
-          className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-indigo-500 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+          className="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-all"
+          style={{ fontWeight: 500, color: '#0064E0' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#E8F3FF' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
         >
           比較モードへ送る
           <ArrowRight className="h-3.5 w-3.5" />
@@ -233,7 +280,6 @@ export function InspectionPage() {
       {/* ── Body: [vertical toolbar] [thumbnails] [viewer] ── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Dark vertical annotation toolbar */}
         <AnnotationToolbar
           annotationKey={annotationKey}
           onExport={handleExport}
@@ -241,7 +287,6 @@ export function InspectionPage() {
           direction="vertical"
         />
 
-        {/* Thumbnail panel */}
         <div className="w-[148px] shrink-0">
           <ThumbnailPanel
             pages={file.pages}
@@ -250,7 +295,6 @@ export function InspectionPage() {
           />
         </div>
 
-        {/* Document viewer */}
         <div className="flex-1 overflow-hidden">
           <DocumentViewer
             file={file}

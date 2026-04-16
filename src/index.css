@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #4338ca;
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
+  /* Meta Blue palette */
+  --color-meta-blue: #0064E0;
+  --color-meta-blue-hover: #0143B5;
+  --color-meta-blue-pressed: #004BB9;
+  --color-meta-blue-light: #47A5FA;
+
+  /* Surface & background */
+  --color-soft-gray: #F1F4F7;
+  --color-warm-gray: #F7F8FA;
+  --color-near-black: #1C1E21;
+  --color-dark-charcoal: #1C2B33;
+
+  /* Text */
+  --color-slate-text: #5D6C7B;
+  --color-divider: #DEE3E9;
+
+  /* Semantic */
+  --color-store-success: #007D1E;
+  --color-store-error: #C80A28;
 
   --animate-fade-in: fade-in 0.18s ease-out both;
   --animate-slide-up: slide-up 0.22s ease-out both;
@@ -28,7 +36,9 @@
 }
 
 :root {
-  font-family: 'Noto Sans JP', 'Inter', system-ui, -apple-system, sans-serif;
+  /* Meta Optimistic VF — fall back to Montserrat (loaded via Google Fonts) */
+  font-family: 'Optimistic VF', 'Montserrat', 'Helvetica Neue', Helvetica, Arial, 'Noto Sans JP', system-ui, sans-serif;
+  font-feature-settings: "ss01", "ss02";
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -47,17 +57,15 @@ html, body, #root {
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #F1F4F7;
+  color: #1C2B33;
 }
 
-/* Text selection highlight */
 ::selection {
-  background-color: #e0e7ff;
-  color: #3730a3;
+  background-color: #E8F3FF;
+  color: #0064E0;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -66,26 +74,16 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #DEE3E9;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #5D6C7B;
 }
 
 /* Canvas cursor states */
-.cursor-crosshair canvas {
-  cursor: crosshair !important;
-}
-.cursor-grab canvas {
-  cursor: grab !important;
-}
-.cursor-grab:active canvas {
-  cursor: grabbing !important;
-}
-.cursor-default canvas {
-  cursor: default !important;
-}
-.cursor-text-tool canvas {
-  cursor: text !important;
-}
+.cursor-crosshair canvas { cursor: crosshair !important; }
+.cursor-grab canvas { cursor: grab !important; }
+.cursor-grab:active canvas { cursor: grabbing !important; }
+.cursor-default canvas { cursor: default !important; }
+.cursor-text-tool canvas { cursor: text !important; }

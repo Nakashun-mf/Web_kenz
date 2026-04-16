@@ -8,11 +8,11 @@ interface InlineNotificationProps {
   className?: string
 }
 
-const variantStyles: Record<NotificationVariant, string> = {
-  error:   'border-red-100 bg-red-50 text-red-600',
-  success: 'border-green-100 bg-green-50 text-green-700',
-  info:    'border-indigo-100 bg-indigo-50 text-indigo-600',
-  warning: 'border-amber-100 bg-amber-50 text-amber-700',
+const variantStyles: Record<NotificationVariant, { bg: string; color: string; dot: string }> = {
+  error:   { bg: '#FFF0F0', color: '#C80A28', dot: '#C80A28' },
+  success: { bg: '#F0FFF4', color: '#007D1E', dot: '#007D1E' },
+  info:    { bg: '#E8F3FF', color: '#0064E0', dot: '#0064E0' },
+  warning: { bg: '#FFFBEB', color: '#92400E', dot: '#F7B928' },
 }
 
 export function InlineNotification({
@@ -21,15 +21,14 @@ export function InlineNotification({
   className,
 }: InlineNotificationProps) {
   if (!message) return null
+  const styles = variantStyles[variant]
   return (
     <div
       role="alert"
-      className={cn(
-        'shrink-0 border-b px-5 py-2 text-sm font-medium',
-        variantStyles[variant],
-        className,
-      )}
+      className={cn('shrink-0 flex items-center gap-2 px-5 py-2 text-sm', className)}
+      style={{ fontWeight: 500, background: styles.bg, color: styles.color, borderBottom: `1px solid ${styles.dot}22` }}
     >
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: styles.dot }} />
       {message}
     </div>
   )
