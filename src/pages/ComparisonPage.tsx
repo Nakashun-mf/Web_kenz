@@ -15,7 +15,6 @@ import { Slider } from '@/components/ui/slider'
 import { Layers, Columns2, FileText } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import type { DocumentFile } from '@/types/document'
-import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
 type FileHandle = {
