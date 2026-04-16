@@ -67,7 +67,7 @@ export default function App() {
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] transition-all duration-150',
+                  'flex items-center gap-2 rounded-full px-5 py-2 text-[13px] transition-all duration-150',
                   tab === value
                     ? 'text-white shadow-sm'
                     : 'hover:text-[#1C2B33]',

@@ -250,7 +250,7 @@ export function InspectionPage() {
         <div className="flex-1" />
         <button
           onClick={() => { pdfProxyRef.current?.destroy(); pdfProxyRef.current = null; tifFramesRef.current = null; setFile(null) }}
-          className="rounded-full px-4 py-1.5 text-sm transition-colors"
+          className="rounded-full px-5 py-2 text-sm transition-colors"
           style={{ fontWeight: 500, color: '#5D6C7B' }}
           onMouseEnter={e => { (e.target as HTMLElement).style.background = '#F1F4F7'; (e.target as HTMLElement).style.color = '#1C2B33' }}
           onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = '#5D6C7B' }}
@@ -260,7 +260,7 @@ export function InspectionPage() {
         <div className="h-4 w-px" style={{ background: '#DEE3E9' }} />
         <button
           onClick={handleSendToComparison}
-          className="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-all"
+          className="flex items-center gap-2 rounded-full px-5 py-2 text-sm transition-all"
           style={{ fontWeight: 500, color: '#0064E0' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#E8F3FF' }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}

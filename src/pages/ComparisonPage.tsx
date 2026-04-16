@@ -160,7 +160,7 @@ export function ComparisonPage() {
             <button
               key={value}
               onClick={() => setLayout(value)}
-              className="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-all"
+              className="flex items-center gap-2 rounded-full px-5 py-2 text-sm transition-all"
               style={{
                 fontWeight: layout === value ? 500 : 400,
                 background: layout === value ? '#0064E0' : 'transparent',
@@ -212,7 +212,7 @@ export function ComparisonPage() {
                   <button
                     key={value}
                     onClick={() => setActivePanel(value)}
-                    className="rounded-full px-4 py-1.5 text-sm transition-all"
+                    className="rounded-full px-5 py-2 text-sm transition-all"
                     style={{
                       fontWeight: activePanel === value ? 500 : 400,
                       background: activePanel === value ? '#0064E0' : 'transparent',
@@ -353,7 +353,7 @@ function PanelHeader({ label, filename, accent }: { label: string; filename?: st
       style={{ background: '#ffffff', borderBottom: '1px solid #DEE3E9' }}
     >
       <span
-        className="shrink-0 rounded-full px-3 py-1 text-[11px] uppercase tracking-wider"
+        className="shrink-0 rounded-full px-4 py-1.5 text-[11px] uppercase tracking-wider"
         style={{
           fontWeight: 700,
           background: accent ? '#E8F3FF' : '#F1F4F7',
